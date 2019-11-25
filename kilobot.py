@@ -5,7 +5,7 @@ import random
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
 size = 30
-velocity = 0
+velocity = 1
 
 
 class Kilobot:
