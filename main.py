@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import pygame
+import sys
 
 from kilobot import Kilobot
 
@@ -14,13 +15,22 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode(windowSize)
     pygame.display.set_caption("")
+    running = True
 
     # Create kilobots
     kilobots = [None] * nKilobots
     for i in range(nKilobots):
         kilobots[i] = Kilobot(windowSize)
 
-    while True:
+    while running:
+        # Input
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
         # Logic
         for kilobot in kilobots:
             kilobot.timestep(deltaTime)
@@ -30,6 +40,10 @@ def main():
         for kilobot in kilobots:
             kilobot.draw(screen)
         pygame.display.update()
+
+    pygame.display.quit()
+    pygame.quit()
+    sys.exit()
 
 if __name__ == "__main__":
     main()
