@@ -29,3 +29,13 @@ class Kilobot:
         )
         pygame.draw.circle(screen, colorBody, position, size)
         pygame.draw.line(screen, colorDirectionLine, position, directionLineTarget, int(size/5))
+
+
+class KilobotOrigin(Kilobot):
+    def __init__ (self, position):
+        self.x = position[0]
+        self.y = position[1]
+        self.direction = random.uniform(0, 2*np.pi)
+
+    def timestep(self, deltaTime):
+        pass
