@@ -5,7 +5,7 @@ import sys
 from kilobot import Kilobot
 
 windowSize = (1280, 720)
-backgroundColor = (0, 0, 0)
+backgroundColor = (20, 20, 20)
 deltaTime = 1
 nKilobots = 10
 

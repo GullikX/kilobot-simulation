@@ -2,9 +2,10 @@ import pygame
 import numpy as np
 import random
 
-color = (128, 128, 128)
+colorBody = (192, 192, 192)
+colorDirectionLine = (25, 118, 210)
 size = 30
-velocity = 1
+velocity = 0
 
 
 class Kilobot:
@@ -21,4 +22,10 @@ class Kilobot:
         self.y += velocity * deltaTime * np.sin(self.direction)
 
     def draw(self, screen):
-        pygame.draw.circle(screen, color, (int(self.x), int(self.y)), size)
+        position = (int(self.x), int(self.y))
+        directionLineTarget = (
+                int(self.x + np.cos(self.direction) * size),
+                int(self.y + np.sin(self.direction) * size),
+        )
+        pygame.draw.circle(screen, colorBody, position, size)
+        pygame.draw.line(screen, colorDirectionLine, position, directionLineTarget, int(size/5))
