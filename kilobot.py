@@ -1,6 +1,4 @@
-import pygame
 import numpy as np
-import random
 
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
@@ -10,11 +8,10 @@ velocity = 1
 
 class Kilobot:
     counter = 0;
-    def __init__ (self, renderer, windowSize):
+    def __init__ (self, renderer, startPosition, startDirection):
         self.renderer = renderer
-        self.x = random.uniform(0, windowSize[0])
-        self.y = random.uniform(0, windowSize[1])
-        self.direction = random.uniform(0, 2*np.pi)
+        self.x, self.y = startPosition
+        self.direction = startDirection
         self.gradientVal = 1    #See paper
         Kilobot.counter += 1
 
@@ -49,7 +46,7 @@ class KilobotOrigin(Kilobot):
         self.renderer = renderer
         self.x = position[0]
         self.y = position[1]
-        self.direction = random.uniform(0, 2*np.pi)
+        self.direction = 0
 
     def timestep(self, deltaTime):
         pass

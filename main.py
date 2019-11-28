@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import pygame
+import numpy as np
+import random
 import sys
 
 from kilobot import Kilobot, KilobotOrigin
@@ -29,7 +31,12 @@ def main():
         if iKilobot < nKilobotsOrigin:
             kilobots[iKilobot] = KilobotOrigin(renderer, kilobotOriginPositions[iKilobot])
         else:
-            kilobots[iKilobot] = Kilobot(renderer, windowSize)
+            startPosition = (
+                random.uniform(-windowSize[0]/2, windowSize[0]/2),
+                random.uniform(-windowSize[1]/2, windowSize[1]/2),
+            )
+            startAngle = random.uniform(0, 2*np.pi)
+            kilobots[iKilobot] = Kilobot(renderer, startPosition, startAngle)
 
     while running:
         # Input
