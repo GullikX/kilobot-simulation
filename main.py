@@ -3,9 +3,9 @@ import pygame
 import sys
 
 from kilobot import Kilobot, KilobotOrigin
+from renderer import Renderer
 
 windowSize = (1280, 720)
-backgroundColor = (20, 20, 20)
 deltaTime = 1
 nKilobots = 10
 nKilobotsOrigin = 4
@@ -20,17 +20,16 @@ kilobotOriginPositions = (  # hack until we have our renderer class in place
 def main():
     # Init pygame
     pygame.init()
-    screen = pygame.display.set_mode(windowSize)
-    pygame.display.set_caption("")
+    renderer = Renderer(windowSize)
     running = True
 
     # Create kilobots
     kilobots = [None] * nKilobots
     for iKilobot in range(nKilobots):
         if iKilobot < nKilobotsOrigin:
-            kilobots[iKilobot] = KilobotOrigin(kilobotOriginPositions[iKilobot])
+            kilobots[iKilobot] = KilobotOrigin(renderer, kilobotOriginPositions[iKilobot])
         else:
-            kilobots[iKilobot] = Kilobot(windowSize)
+            kilobots[iKilobot] = Kilobot(renderer, windowSize)
 
     while running:
         # Input
@@ -46,10 +45,10 @@ def main():
             kilobot.timestep(deltaTime)
 
         # Drawing
-        screen.fill(backgroundColor)
+        renderer.clearScreen()
         for kilobot in kilobots:
-            kilobot.draw(screen)
-        pygame.display.update()
+            kilobot.draw()
+        renderer.updateDisplay()
 
     pygame.display.quit()
     pygame.quit()
