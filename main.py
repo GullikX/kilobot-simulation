@@ -9,11 +9,11 @@ windowSize = (1280, 720)
 deltaTime = 1
 nKilobots = 10
 nKilobotsOrigin = 4
-kilobotOriginPositions = (  # hack until we have our renderer class in place
-        (640, 300),
-        (640, 420),
-        (680, 360),
-        (600, 360),
+kilobotOriginPositions = (
+        (0, -60),
+        (0, 60),
+        (40, 0),
+        (-40, 0),
 )
 
 

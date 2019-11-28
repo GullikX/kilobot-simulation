@@ -5,8 +5,8 @@ windowCaption = "Kilobot simulation"
 
 xScale = 1
 yScale = 1
-xOffset = 0
-yOffset = 0
+xOffset = 640
+yOffset = 360
 
 class Renderer:
     def __init__(self, windowSize):
