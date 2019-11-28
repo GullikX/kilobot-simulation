@@ -42,11 +42,5 @@ class Kilobot:
 
 
 class KilobotOrigin(Kilobot):
-    def __init__ (self, renderer, position):
-        self.renderer = renderer
-        self.x = position[0]
-        self.y = position[1]
-        self.direction = 0
-
     def timestep(self, deltaTime):
         pass

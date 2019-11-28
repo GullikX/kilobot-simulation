@@ -29,7 +29,7 @@ def main():
     kilobots = [None] * nKilobots
     for iKilobot in range(nKilobots):
         if iKilobot < nKilobotsOrigin:
-            kilobots[iKilobot] = KilobotOrigin(renderer, kilobotOriginPositions[iKilobot])
+            kilobots[iKilobot] = KilobotOrigin(renderer, kilobotOriginPositions[iKilobot], 0)
         else:
             startPosition = (  # Temporary, use proper start positions and angles later
                 random.uniform(-windowSize[0]/2, windowSize[0]/2),
