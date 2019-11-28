@@ -9,13 +9,25 @@ velocity = 1
 
 
 class Kilobot:
+    counter = 0;
     def __init__ (self, windowSize, coordInit = False):
         self.x = random.uniform(0, windowSize[0])
         self.y = random.uniform(0, windowSize[1])
         self.direction = random.uniform(0, 2*np.pi)
+        self.gradientVal = 1    %See paper
+        Kilobot.counter += 1
 
-        #if coordInit = True:
-        #    #TODO initialize the pos of the fours coordinate robots
+    def _setGradient(self, kilobots, gDist):
+        highestGradient = 0;
+        for bot in kilobots:
+            xDiff = self.x - bot.x
+            yDiff = self.y - bot.y
+            dist = sqrt(xDiff^2 + yDiff^2)
+
+            if dist < gDist && bot.gradientVal > highestGradient:
+                highestGradient = bot.gradientVal
+        self.gradientVal = 1 + highestGradient
+
 
     def timestep(self, deltaTime):
         self.x += velocity * deltaTime * np.cos(self.direction)
