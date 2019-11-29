@@ -7,9 +7,9 @@ import sys
 from kilobot import Kilobot, KilobotOrigin, getPositions
 from renderer import Renderer
 
-windowSize = (1280, 720)
+windowSize = (640, 360)
 deltaTime = 1
-nKilobots = 10
+nKilobots = 5
 nKilobotsOrigin = 4
 
 kilobotOriginPositions = getPositions()
@@ -50,7 +50,8 @@ def main():
         renderer.clearScreen()
         for kilobot in kilobots:
             kilobot.draw()
-        renderer.updateDisplay()
+        surf = renderer.updateDisplay()
+
 
     pygame.display.quit()
     pygame.quit()

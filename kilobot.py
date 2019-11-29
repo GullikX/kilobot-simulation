@@ -3,7 +3,7 @@ import csv
 
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
-size = 10
+size =15
 velocity = 1
 turnSpeed = np.pi / 36
 

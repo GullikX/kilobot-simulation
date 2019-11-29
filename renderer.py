@@ -3,9 +3,9 @@ import pygame
 backgroundColor = (20, 20, 20)
 windowCaption = "Kilobot simulation"
 
-scaleFactor = 1
-xOffset = 640
-yOffset = 360
+scaleFactor = 0.8
+xOffset = 320
+yOffset = 180
 
 class Renderer:
     def __init__(self, windowSize):
@@ -38,3 +38,4 @@ class Renderer:
 
     def updateDisplay(self):
         pygame.display.update()
+        return self.screen
