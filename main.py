@@ -4,20 +4,15 @@ import numpy as np
 import random
 import sys
 
-from kilobot import Kilobot, KilobotOrigin
+from kilobot import Kilobot, KilobotOrigin, getPositions
 from renderer import Renderer
 
 windowSize = (1280, 720)
 deltaTime = 1
 nKilobots = 10
 nKilobotsOrigin = 4
-kilobotOriginPositions = (
-        (0, -60),
-        (0, 60),
-        (40, 0),
-        (-40, 0),
-)
-#kilobotOriginPositions = getPositions()
+
+kilobotOriginPositions = getPositions()
 
 def main():
     # Init pygame
@@ -49,7 +44,7 @@ def main():
 
         # Logic
         for kilobot in kilobots:
-            kilobot.findClosest(deltaTime)
+            kilobot.findClosest(deltaTime,kilobots)
 
         # Drawing
         renderer.clearScreen()

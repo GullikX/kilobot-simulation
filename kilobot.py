@@ -1,8 +1,9 @@
 import numpy as np
+import csv
 
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
-size = 30
+size = 10
 velocity = 1
 turnSpeed = np.pi / 36
 
@@ -16,14 +17,19 @@ class Kilobot:
         self.x, self.y = startPosition
         self.direction = startDirection
         self.gradientVal = 1    #See paper
+        if Kilobot.counter < 4:
+            self.moveVal = 3
+        else:
+            self.moveVal = 0
         Kilobot.counter += 1
+
 
     def _setGradient(self, kilobots, gDist):
         highestGradient = 0
         for bot in kilobots:
             xDiff = self.x - bot.x
             yDiff = self.y - bot.y
-            dist = sqrt(xDiff^2 + yDiff^2)
+            dist = sqrt(xDiff**2 + yDiff**2)
 
             if dist < gDist and bot.gradientVal > highestGradient:
                 highestGradient = bot.gradientVal
@@ -40,20 +46,21 @@ class Kilobot:
         nearestY = 1
 
         for bot in kilobots:
-            r = np.sqrt( (self.x - bot.x)^2 + (self.y - bot.y)^2 )
-            if r < rmax:
-                rmax = r
-                nearestX = bot.x
-                nearestY = bot.y
-
-        kilobot.move(self, deltaTime, nearestX, nearestY)
+            if bot is not self:
+                r = np.sqrt( (self.x - bot.x)**2 + (self.y - bot.y)**2 )
+                if r < rmax:
+                    rmax = r
+                    nearestX = bot.x
+                    nearestY = bot.y
+        if self.moveVal == 0:
+            self.move(deltaTime, nearestX, nearestY)
 
     def move(self, deltaTime, nearestX, nearestY):
         dx = self.x - nearestX
         dy = self.y - nearestY
         rVector = np.array([dx, dy, 0])
         w = np.cross(rVector, np.array([0, 0, 1]))
-        tempVector = w / np.sqrt( np.dot(w, w) ) + ( preferedDistance - np.sqrt(dx^2 + dy^2) ) / ( preferedDistance - 2 * size ) * rVector / np.sqrt(rVector,rVector)
+        tempVector = w / np.sqrt( np.dot(w, w) ) + ( preferedDistance - np.sqrt(dx**2 + dy**2) ) / ( preferedDistance - 2 * size ) * rVector / np.sqrt(np.dot(rVector,rVector))
         preferedDirectionVector = tempVector / np.sqrt( np.dot(tempVector, tempVector) )
 
         directionVector = np.array([np.cos(self.direction), np.sin(self.direction), 0])
