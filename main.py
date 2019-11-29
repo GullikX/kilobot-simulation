@@ -17,7 +17,7 @@ kilobotOriginPositions = (
         (40, 0),
         (-40, 0),
 )
-
+#kilobotOriginPositions = getPositions()
 
 def main():
     # Init pygame
