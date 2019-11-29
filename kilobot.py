@@ -1,4 +1,6 @@
 import numpy as np
+from queue import PriorityQueue
+import csv
 
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
@@ -8,12 +10,15 @@ velocity = 1
 
 class Kilobot:
     counter = 0;
+    q = PriorityQueue()
     def __init__ (self, renderer, startPosition, startDirection):
         self.renderer = renderer
         self.x, self.y = startPosition
         self.direction = startDirection
         self.gradientVal = 1    #See paper
+
         Kilobot.counter += 1
+        Kilobot.q.put(self) #Har inte testat ifall detta funkar
 
     def _setGradient(self, kilobots, gDist):
         highestGradient = 0;
@@ -44,3 +49,13 @@ class Kilobot:
 class KilobotOrigin(Kilobot):
     def timestep(self, deltaTime):
         pass
+
+def getPositions(file='initPos.csv'):
+    positions = []
+    with open(file, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter=':')
+        for row in reader:
+            x= int(row[0])
+            y = int(row[1])
+            positions.append([x,y])
+    return positions
