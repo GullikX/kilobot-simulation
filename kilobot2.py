@@ -34,14 +34,19 @@ class Kilobot:
         self.x += velocity * deltaTime * np.cos(self.direction)
         self.y += velocity * deltaTime * np.sin(self.direction)
 
-    def findClosest(self, kilobots):
+    def findClosest(self, deltaTime, kilobots):
         rmax = 100
+        nearestX = 1
+        nearestY = 1
+
         for bot in kilobots:
             r = np.sqrt( (self.x - bot.x)^2 + (self.y - bot.y)^2 )
             if r < rmax:
-                
+                rmax = r
+                nearestX = bot.x
+                nearestY = bot.y
 
-
+        kilobot.move(self, deltaTime, nearestX, nearestY)
 
     def move(self, deltaTime, nearestX, nearestY):
         dx = self.x - nearestX
