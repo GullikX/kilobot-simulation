@@ -3,8 +3,7 @@ import pygame
 backgroundColor = (20, 20, 20)
 windowCaption = "Kilobot simulation"
 
-xScale = 1
-yScale = 1
+scaleFactor = 1
 xOffset = 640
 yOffset = 360
 
@@ -18,21 +17,24 @@ class Renderer:
 
     def drawCircle(self, color, coordinates, size):
         screenPosition = [None] * 2
-        screenPosition[0] = int((coordinates[0] + xOffset) * xScale)
-        screenPosition[1] = int((coordinates[1] + yOffset) * yScale)
+        screenPosition[0] = int(coordinates[0] * scaleFactor + xOffset)
+        screenPosition[1] = int(coordinates[1] * scaleFactor + yOffset)
+        screenSize = int(size * scaleFactor)
 
-        pygame.draw.circle(self.screen, color, screenPosition, size)
+        pygame.draw.circle(self.screen, color, screenPosition, screenSize)
 
     def drawLine(self, color, coordinatesStart, coordinatesEnd, width):
         screenPositionStart = [None] * 2
-        screenPositionStart[0] = int((coordinatesStart[0] + xOffset) * xScale)
-        screenPositionStart[1] = int((coordinatesStart[1] + yOffset) * yScale)
+        screenPositionStart[0] = int(coordinatesStart[0] * scaleFactor + xOffset)
+        screenPositionStart[1] = int(coordinatesStart[1] * scaleFactor + yOffset)
 
         screenPositionEnd = [None] * 2
-        screenPositionEnd[0] = int((coordinatesEnd[0] + xOffset) * xScale)
-        screenPositionEnd[1] = int((coordinatesEnd[1] + yOffset) * yScale)
+        screenPositionEnd[0] = int(coordinatesEnd[0] * scaleFactor + xOffset)
+        screenPositionEnd[1] = int(coordinatesEnd[1] * scaleFactor + yOffset)
 
-        pygame.draw.line(self.screen, color, screenPositionStart, screenPositionEnd, int(width))
+        screenWidth = int(width * scaleFactor)
+
+        pygame.draw.line(self.screen, color, screenPositionStart, screenPositionEnd, screenWidth)
 
     def updateDisplay(self):
         pygame.display.update()
