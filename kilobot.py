@@ -1,5 +1,4 @@
 import numpy as np
-import csv
 
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
