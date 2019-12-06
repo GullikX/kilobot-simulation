@@ -61,7 +61,10 @@ class Kilobot:
         return nearestX, nearestY
 
     def _move(self, deltaTime, nearestX, nearestY, bitMap, scalingFactor):
-        bitMapx = int(self.x/scalingFactor)
+        bitMapX = int(self.x/scalingFactor)
+        bitMapY = int(self.y/scalingFactor)
+
+        bitMapVal = bitMap[bitMapX, bitMapY]
         dx = self.x - nearestX
         dy = self.y - nearestY
         rVector = np.array([dx, dy, 0])
@@ -114,7 +117,9 @@ def getBitMap(file='data/bitmap.csv'):
             row=[int(i) for i in row]
             bitArray.append(row)
 
-    return np.asarray(bitArray)
+    bitArray =  np.asarray(bitArray)
+    return np.asmatrix(bitArray)
+
 
 
 a = getBitMap()
