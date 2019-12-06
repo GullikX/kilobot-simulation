@@ -13,10 +13,12 @@ maxAngleError = np.pi / 36
 
 class Kilobot:
     counter = 0;
-    def __init__ (self, renderer, startPosition, startDirection):
+    def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor):
         self.renderer = renderer
         self.x, self.y = startPosition
         self.direction = startDirection
+        self.bitMapArray = bitMapArray
+        self.bitMapScalingFactor = bitMapScalingFactor
         self.gradientVal = np.inf    #See paper
         if Kilobot.counter < 4:
             if Kilobot.counter == 0:
@@ -41,10 +43,10 @@ class Kilobot:
                 minimumGradient = bot.gradientVal
         self.gradientVal = 1 + minimumGradient
 
-    def timestep(self, deltaTime, kilobots, bitMap, scalingFactor):
+    def timestep(self, deltaTime, kilobots):
         self._setGradient(kilobots)
         nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
-        self._move(deltaTime, nearestRobotX, nearestRobotY, bitMap, scalingFactor)
+        self._move(deltaTime, nearestRobotX, nearestRobotY)
 
     def _findClosest(self, deltaTime, kilobots):
         rmax = 100
@@ -60,11 +62,11 @@ class Kilobot:
                     nearestY = bot.y
         return nearestX, nearestY
 
-    def _move(self, deltaTime, nearestX, nearestY, bitMap, scalingFactor):
-        bitMapX = int(self.x/scalingFactor)
-        bitMapY = int(self.y/scalingFactor)
+    def _move(self, deltaTime, nearestX, nearestY):
+        bitMapX = int(self.x/self.bitMapScalingFactor)
+        bitMapY = int(self.y/self.bitMapScalingFactor)
 
-        bitMapVal = bitMap[bitMapX, bitMapY]
+        bitMapVal = self.bitMapArray[bitMapX, bitMapY]
         dx = self.x - nearestX
         dy = self.y - nearestY
         rVector = np.array([dx, dy, 0])
@@ -98,7 +100,7 @@ class KilobotOrigin(Kilobot):
     def timestep(self, deltaTime, kilobots):
         pass
 
-def getPositions(file='initPos.csv'):
+def getPositions(file='data/initPos.csv'):
     positions = []
     with open(file, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=':')

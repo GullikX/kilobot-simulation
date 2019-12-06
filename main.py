@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import csv
 import pygame
 import numpy as np
 import random
@@ -11,23 +12,34 @@ windowSize = (1280, 720)
 deltaTime = 1
 nKilobots = 10
 nKilobotsOrigin = 4
+bitmapFile = "data/bitmap.csv"
+bitMapScalingFactor = 100
 
 kilobotOriginPositions = getPositions()
 
 def main():
+    # Load shape bitmap
+    bitMapArray = []
+    with open(bitmapFile, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            row=[int(i) for i in row]
+            bitMapArray.append(row)
+    bitMapArray = np.array(bitMapArray)
+
     # Init pygame
     pygame.init()
-    renderer = Renderer(windowSize)
+    renderer = Renderer(windowSize, bitMapArray)
     running = True
 
     # Create kilobots
     kilobots = [None] * nKilobots
     for iKilobot in range(nKilobots):
         if iKilobot < nKilobotsOrigin:
-            kilobots[iKilobot] = KilobotOrigin(renderer, kilobotOriginPositions[iKilobot], 0)
+            kilobots[iKilobot] = KilobotOrigin(renderer, kilobotOriginPositions[iKilobot], 0, bitMapArray, bitMapScalingFactor)
         else:
             startAngle = random.uniform(0, 2*np.pi)
-            kilobots[iKilobot] = Kilobot(renderer, kilobotOriginPositions[iKilobot], startAngle)
+            kilobots[iKilobot] = Kilobot(renderer, kilobotOriginPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor)
 
     while running:
         # Input

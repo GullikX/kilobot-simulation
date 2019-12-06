@@ -12,7 +12,7 @@ yFlip = -1
 
 
 class Renderer:
-    def __init__(self, windowSize):
+    def __init__(self, windowSize, bitMapArray):
         self.screen = pygame.display.set_mode(windowSize)
         pygame.display.set_caption(windowCaption)
         self.textFont = pygame.font.Font(pygame.font.get_default_font(), int(fontSizeFactor * scaleFactor))
