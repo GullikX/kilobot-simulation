@@ -15,7 +15,7 @@ class Renderer:
     def __init__(self, windowSize):
         self.screen = pygame.display.set_mode(windowSize)
         pygame.display.set_caption(windowCaption)
-        self.textFont = pygame.font.Font(pygame.font.get_default_font(), int(25 * scaleFactor))
+        self.textFont = pygame.font.Font(pygame.font.get_default_font(), int(fontSizeFactor * scaleFactor))
 
     def clearScreen(self):
         self.screen.fill(backgroundColor)
