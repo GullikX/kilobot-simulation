@@ -1,6 +1,5 @@
 import numpy as np
 import pygame
-import pygame.freetype
 
 backgroundColor = (20, 20, 20)
 bitMapColor = (50, 50, 50)

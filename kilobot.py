@@ -1,5 +1,4 @@
 import numpy as np
-import csv
 
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
@@ -117,25 +116,3 @@ class Kilobot:
 class KilobotOrigin(Kilobot):
     def timestep(self, deltaTime, kilobots):
         pass
-
-def getPositions(file='data/initPos.csv'):
-    positions = []
-    with open(file, 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter=':')
-        for row in reader:
-            x= int(row[0])
-            y = int(row[1])
-            positions.append([x,y])
-    return positions
-
-
-def getBitMap(file='data/bitmap.csv'):
-    bitArray = []
-    with open(file, 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        for row in reader:
-            row=[int(i) for i in row]
-            bitArray.append(row)
-
-    bitArray =  np.asarray(bitArray)
-    bitArray =  np.asmatrix(bitArray)
