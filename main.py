@@ -39,8 +39,8 @@ def main():
                     running = False
 
         # Logic
-        #for kilobot in kilobots:
-        #    kilobot.timestep(deltaTime, kilobots)
+        for kilobot in kilobots:
+            kilobot.timestep(deltaTime, kilobots)
 
         # Drawing
         renderer.clearScreen()

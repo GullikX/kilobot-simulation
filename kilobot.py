@@ -6,7 +6,7 @@ colorDirectionLine = (25, 118, 210)
 size =15
 velocity = 1
 turnSpeed = np.pi / 36
-communicationRange = 30
+communicationRange = 60
 
 preferedDistance = 50 #Bugged for <= 2 * size
 maxAngleError = np.pi / 36
@@ -17,8 +17,12 @@ class Kilobot:
         self.renderer = renderer
         self.x, self.y = startPosition
         self.direction = startDirection
-        self.gradientVal = 1    #See paper
+        self.gradientVal = np.inf    #See paper
         if Kilobot.counter < 4:
+            if Kilobot.counter == 0:
+                self.gradientVal = 0
+            else:
+                self.gradientVal = 1
             self.moveVal = 3
         else:
             self.moveVal = 0
@@ -33,7 +37,7 @@ class Kilobot:
             yDiff = self.y - bot.y
             dist = np.sqrt(xDiff**2 + yDiff**2)
 
-            if dist < communicationRange and bot.gradientVal < minimumGradient:
+            if dist <= communicationRange and bot.gradientVal < minimumGradient:
                 minimumGradient = bot.gradientVal
         self.gradientVal = 1 + minimumGradient
 
