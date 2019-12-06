@@ -41,6 +41,22 @@ class Renderer:
 
         pygame.draw.line(self.screen, color, screenPositionStart, screenPositionEnd, screenWidth)
 
+    def drawRectangle(self, color, coordinates, size):
+        screenPosition = [None] * 2
+        screenPosition[0] = int(coordinates[0] * scaleFactor + xOffset)
+        screenPosition[1] = int(coordinates[1] * scaleFactor * yFlip + yOffset)
+
+        screenSize = [None] * 2
+        screenSize[0] = int(size[0] * scaleFactor)
+        screenSize[1] = int(size[1] * scaleFactor * yFlip)
+
+        rect = pygame.Rect(
+            screenPosition[0], screenPosition[1],
+            screenSize[0], screenSize[1],
+        )
+
+        pygame.draw.rect(self.screen, color, rect)
+
     def drawText(self, color, string, coordinates):
         screenPosition = [None] * 2
         screenPosition[0] = int(coordinates[0] * scaleFactor + xOffset)
@@ -54,5 +70,6 @@ class Renderer:
         )
 
     def updateDisplay(self):
+        self.drawRectangle((255, 0, 0), (200, 200), (20, 20))
         pygame.display.update()
         return self.screen
