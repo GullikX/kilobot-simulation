@@ -62,34 +62,54 @@ class Kilobot:
                     nearestY = bot.y
         return nearestX, nearestY
 
+
+    def getBinaryCoord(self):
+        if self.x >  0 or self.y > 0:
+            bitMapX = int(self.x/self.bitMapScalingFactor)
+            bitMapY = int(self.y/self.bitMapScalingFactor)
+
+            bitShape = self.bitMapArray.shape
+            if bitMapX >= 0 and bitMapX < bitShape[0] and bitMapY >= 0 and bitMapY < bitShape[1]:
+                print(bitMapX, bitMapY)
+                bitMapVal = self.bitMapArray[bitMapX, bitMapY]
+
     def _move(self, deltaTime, nearestX, nearestY):
-        bitMapX = int(self.x/self.bitMapScalingFactor)
-        bitMapY = int(self.y/self.bitMapScalingFactor)
+        bitMapVal = 0
+        if self.x >  0 and self.y > 0:
+            bitMapX = int(self.x/self.bitMapScalingFactor)
+            bitMapY = int(self.y/self.bitMapScalingFactor)
+            print(self.x, bitMapX)
+            bitShape = self.bitMapArray.shape
+            if bitMapX >= 0 and bitMapX < bitShape[0] and bitMapY >= 0 and bitMapY < bitShape[1]:
+                print(bitMapX, bitMapY)
+                bitMapVal = self.bitMapArray[bitMapX, bitMapY]
 
-        bitMapVal = self.bitMapArray[bitMapX, bitMapY]
-        dx = self.x - nearestX
-        dy = self.y - nearestY
-        rVector = np.array([dx, dy, 0])
-        w = np.cross(rVector, np.array([0, 0, 1]))
-        tempVector = w / np.sqrt( np.dot(w, w) ) + ( preferedDistance - np.sqrt(dx**2 + dy**2) ) / ( preferedDistance - 2 * size ) * rVector / np.sqrt(np.dot(rVector,rVector))
-        preferedDirectionVector = tempVector / np.sqrt( np.dot(tempVector, tempVector) )
+        if bitMapVal == 0:
+            dx = self.x - nearestX
+            dy = self.y - nearestY
+            rVector = np.array([dx, dy, 0])
+            w = np.cross(rVector, np.array([0, 0, 1]))
+            tempVector = w / np.sqrt( np.dot(w, w) ) + ( preferedDistance - np.sqrt(dx**2 + dy**2) ) / ( preferedDistance - 2 * size ) * rVector / np.sqrt(np.dot(rVector,rVector))
+            preferedDirectionVector = tempVector / np.sqrt( np.dot(tempVector, tempVector) )
 
-        directionVector = np.array([np.cos(self.direction), np.sin(self.direction), 0])
-        choiceVector = np.dot(preferedDirectionVector, directionVector)
+            directionVector = np.array([np.cos(self.direction), np.sin(self.direction), 0])
+            choiceVector = np.dot(preferedDirectionVector, directionVector)
 
-        if choiceVector < np.cos(maxAngleError):
-            w = np.cross(directionVector, np.array([0, 0, 1]))
-            tempVector = np.dot(w,preferedDirectionVector)
-            self.direction -= turnSpeed * tempVector / np.sqrt( np.dot(tempVector, tempVector) )
-        else:
-            self.x += velocity * deltaTime * np.cos(self.direction)
-            self.y += velocity * deltaTime * np.sin(self.direction)
+            if choiceVector < np.cos(maxAngleError):
+                w = np.cross(directionVector, np.array([0, 0, 1]))
+                tempVector = np.dot(w,preferedDirectionVector)
+                self.direction -= turnSpeed * tempVector / np.sqrt( np.dot(tempVector, tempVector) )
+            else:
+                self.x += velocity * deltaTime * np.cos(self.direction)
+                self.y += velocity * deltaTime * np.sin(self.direction)
+
 
     def draw(self):
+
         position = (int(self.x), int(self.y))
         directionLineTarget = (
-                int(self.x + np.cos(self.direction) * size),
-                int(self.y + np.sin(self.direction) * size),
+            int(self.x + np.cos(self.direction) * size),
+            int(self.y + np.sin(self.direction) * size),
         )
         self.renderer.drawCircle(colorBody, position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/5)
@@ -120,9 +140,9 @@ def getBitMap(file='data/bitmap.csv'):
             bitArray.append(row)
 
     bitArray =  np.asarray(bitArray)
-    return np.asmatrix(bitArray)
+    bitArray =  np.asmatrix(bitArray)
+
 
 
 
 a = getBitMap()
-print(a)
