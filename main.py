@@ -9,7 +9,7 @@ from renderer import Renderer
 
 windowSize = (640, 360)
 deltaTime = 1
-nKilobots = 5
+nKilobots = 10
 nKilobotsOrigin = 4
 
 kilobotOriginPositions = getPositions()
@@ -26,12 +26,8 @@ def main():
         if iKilobot < nKilobotsOrigin:
             kilobots[iKilobot] = KilobotOrigin(renderer, kilobotOriginPositions[iKilobot], 0)
         else:
-            startPosition = (  # Temporary, use proper start positions and angles later
-                random.uniform(-windowSize[0]/2, windowSize[0]/2),
-                random.uniform(-windowSize[1]/2, windowSize[1]/2),
-            )
             startAngle = random.uniform(0, 2*np.pi)
-            kilobots[iKilobot] = Kilobot(renderer, startPosition, startAngle)
+            kilobots[iKilobot] = Kilobot(renderer, kilobotOriginPositions[iKilobot], startAngle)
 
     while running:
         # Input
@@ -43,8 +39,8 @@ def main():
                     running = False
 
         # Logic
-        for kilobot in kilobots:
-            kilobot.timestep(deltaTime, kilobots)
+        #for kilobot in kilobots:
+        #    kilobot.timestep(deltaTime, kilobots)
 
         # Drawing
         renderer.clearScreen()
