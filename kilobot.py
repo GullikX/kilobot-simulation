@@ -6,6 +6,7 @@ colorDirectionLine = (25, 118, 210)
 size =15
 velocity = 1
 turnSpeed = np.pi / 36
+communicationRange = 30
 
 preferedDistance = 50 #Bugged for <= 2 * size
 maxAngleError = np.pi / 36
@@ -23,26 +24,25 @@ class Kilobot:
             self.moveVal = 0
         Kilobot.counter += 1
 
-
-    def _setGradient(self, kilobots, gDist):
+    def _setGradient(self, kilobots):
         minimumGradient = np.inf
         for bot in kilobots:
             if bot is self:
                 continue
             xDiff = self.x - bot.x
             yDiff = self.y - bot.y
-            dist = sqrt(xDiff**2 + yDiff**2)
+            dist = np.sqrt(xDiff**2 + yDiff**2)
 
-            if dist < gDist and bot.gradientVal < minimumGradient:
+            if dist < communicationRange and bot.gradientVal < minimumGradient:
                 minimumGradient = bot.gradientVal
         self.gradientVal = 1 + minimumGradient
 
+    def timestep(self, deltaTime, kilobots):
+        self._setGradient(kilobots)
+        nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
+        self._move(deltaTime, nearestRobotX, nearestRobotY)
 
-    def timestep(self, deltaTime):
-        self.x += velocity * deltaTime * np.cos(self.direction)
-        self.y += velocity * deltaTime * np.sin(self.direction)
-
-    def findClosest(self, deltaTime, kilobots):
+    def _findClosest(self, deltaTime, kilobots):
         rmax = 100
         nearestX = 1
         nearestY = 1
@@ -54,10 +54,9 @@ class Kilobot:
                     rmax = r
                     nearestX = bot.x
                     nearestY = bot.y
-        if self.moveVal == 0:
-            self.move(deltaTime, nearestX, nearestY)
+        return nearestX, nearestY
 
-    def move(self, deltaTime, nearestX, nearestY):
+    def _move(self, deltaTime, nearestX, nearestY):
         dx = self.x - nearestX
         dy = self.y - nearestY
         rVector = np.array([dx, dy, 0])
@@ -87,7 +86,7 @@ class Kilobot:
 
 
 class KilobotOrigin(Kilobot):
-    def timestep(self, deltaTime):
+    def timestep(self, deltaTime, kilobots):
         pass
 
 def getPositions(file='initPos.csv'):

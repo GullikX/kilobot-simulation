@@ -44,7 +44,7 @@ def main():
 
         # Logic
         for kilobot in kilobots:
-            kilobot.findClosest(deltaTime,kilobots)
+            kilobot.timestep(deltaTime, kilobots)
 
         # Drawing
         renderer.clearScreen()
