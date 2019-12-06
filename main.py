@@ -29,7 +29,7 @@ def main():
 
     # Init pygame
     pygame.init()
-    renderer = Renderer(windowSize, bitMapArray)
+    renderer = Renderer(windowSize, bitMapArray, bitMapScalingFactor)
     running = True
 
     # Create kilobots
@@ -56,6 +56,7 @@ def main():
 
         # Drawing
         renderer.clearScreen()
+        renderer.drawBitMap()
         for kilobot in kilobots:
             kilobot.draw()
         surf = renderer.updateDisplay()

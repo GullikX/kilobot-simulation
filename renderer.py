@@ -1,7 +1,9 @@
+import numpy as np
 import pygame
 import pygame.freetype
 
 backgroundColor = (20, 20, 20)
+bitMapColor = (50, 50, 50)
 windowCaption = "Kilobot simulation"
 
 scaleFactor = 1.25
@@ -12,13 +14,25 @@ yFlip = -1
 
 
 class Renderer:
-    def __init__(self, windowSize, bitMapArray):
+    def __init__(self, windowSize, bitMapArray, bitMapScalingFactor):
         self.screen = pygame.display.set_mode(windowSize)
+        self.bitMapArray = np.flipud(bitMapArray)
+        self.bitMapScalingFactor = bitMapScalingFactor
         pygame.display.set_caption(windowCaption)
         self.textFont = pygame.font.Font(pygame.font.get_default_font(), int(fontSizeFactor * scaleFactor))
 
     def clearScreen(self):
         self.screen.fill(backgroundColor)
+
+    def drawBitMap(self):
+        for i in range(np.shape(self.bitMapArray)[0]):
+            for j in range(np.shape(self.bitMapArray)[1]):
+                if self.bitMapArray[i, j] == 0:
+                    continue
+                coordinates = (j * self.bitMapScalingFactor, i * self.bitMapScalingFactor)
+                size = (self.bitMapScalingFactor, self.bitMapScalingFactor)
+                self.drawRectangle(bitMapColor, coordinates, size)
+
 
     def drawCircle(self, color, coordinates, size):
         screenPosition = [None] * 2
@@ -70,6 +84,5 @@ class Renderer:
         )
 
     def updateDisplay(self):
-        self.drawRectangle((255, 0, 0), (200, 200), (20, 20))
         pygame.display.update()
         return self.screen
