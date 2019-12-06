@@ -83,6 +83,7 @@ class Kilobot:
         )
         self.renderer.drawCircle(colorBody, position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/5)
+        self.renderer.drawText((255, 0, 0), str(self.gradientVal), position)
 
 
 class KilobotOrigin(Kilobot):

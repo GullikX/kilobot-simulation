@@ -7,7 +7,7 @@ import sys
 from kilobot import Kilobot, KilobotOrigin, getPositions
 from renderer import Renderer
 
-windowSize = (640, 360)
+windowSize = (1280, 720)
 deltaTime = 1
 nKilobots = 10
 nKilobotsOrigin = 4

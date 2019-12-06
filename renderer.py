@@ -1,18 +1,21 @@
 import pygame
+import pygame.freetype
 
 backgroundColor = (20, 20, 20)
 windowCaption = "Kilobot simulation"
 
-scaleFactor = 0.8
-xOffset = 320
-yOffset = 180
+scaleFactor = 1.25
+fontSizeFactor = 25
+xOffset = 640
+yOffset = 360
 yFlip = -1
 
 
 class Renderer:
     def __init__(self, windowSize):
-        self. screen = pygame.display.set_mode(windowSize)
+        self.screen = pygame.display.set_mode(windowSize)
         pygame.display.set_caption(windowCaption)
+        self.textFont = pygame.font.Font(pygame.font.get_default_font(), int(25 * scaleFactor))
 
     def clearScreen(self):
         self.screen.fill(backgroundColor)
@@ -37,6 +40,18 @@ class Renderer:
         screenWidth = int(width * scaleFactor)
 
         pygame.draw.line(self.screen, color, screenPositionStart, screenPositionEnd, screenWidth)
+
+    def drawText(self, color, string, coordinates):
+        screenPosition = [None] * 2
+        screenPosition[0] = int(coordinates[0] * scaleFactor + xOffset)
+        screenPosition[1] = int(coordinates[1] * scaleFactor * yFlip + yOffset)
+
+        text = self.textFont.render(string, True, color)
+        self.screen.blit(text, (
+            screenPosition[0] - text.get_width() // 2,
+            screenPosition[1] - text.get_height() // 2,
+            )
+        )
 
     def updateDisplay(self):
         pygame.display.update()
