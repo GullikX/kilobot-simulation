@@ -9,6 +9,7 @@ from kilobot import Kilobot, KilobotOrigin, getPositions
 from renderer import Renderer
 
 windowSize = (1280, 720)
+fps = 60
 deltaTime = 1
 nKilobots = 10
 nKilobotsOrigin = 4
@@ -29,6 +30,7 @@ def main():
 
     # Init pygame
     pygame.init()
+    fpsClock = pygame.time.Clock()
     renderer = Renderer(windowSize, bitMapArray, bitMapScalingFactor)
     running = True
 
@@ -61,6 +63,8 @@ def main():
             kilobot.draw()
         surf = renderer.updateDisplay()
 
+        # Wait until next frame
+        fpsClock.tick(fps)
 
     pygame.display.quit()
     pygame.quit()
