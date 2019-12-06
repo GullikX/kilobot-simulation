@@ -25,15 +25,17 @@ class Kilobot:
 
 
     def _setGradient(self, kilobots, gDist):
-        highestGradient = 0
+        minimumGradient = np.inf
         for bot in kilobots:
+            if bot is self:
+                continue
             xDiff = self.x - bot.x
             yDiff = self.y - bot.y
             dist = sqrt(xDiff**2 + yDiff**2)
 
-            if dist < gDist and bot.gradientVal > highestGradient:
-                highestGradient = bot.gradientVal
-        self.gradientVal = 1 + highestGradient
+            if dist < gDist and bot.gradientVal < minimumGradient:
+                minimumGradient = bot.gradientVal
+        self.gradientVal = 1 + minimumGradient
 
 
     def timestep(self, deltaTime):
