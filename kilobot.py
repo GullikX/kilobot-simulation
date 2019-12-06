@@ -41,10 +41,10 @@ class Kilobot:
                 minimumGradient = bot.gradientVal
         self.gradientVal = 1 + minimumGradient
 
-    def timestep(self, deltaTime, kilobots):
+    def timestep(self, deltaTime, kilobots, bitMap, scalingFactor):
         self._setGradient(kilobots)
         nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
-        self._move(deltaTime, nearestRobotX, nearestRobotY)
+        self._move(deltaTime, nearestRobotX, nearestRobotY, bitMap, scalingFactor)
 
     def _findClosest(self, deltaTime, kilobots):
         rmax = 100
@@ -60,7 +60,8 @@ class Kilobot:
                     nearestY = bot.y
         return nearestX, nearestY
 
-    def _move(self, deltaTime, nearestX, nearestY):
+    def _move(self, deltaTime, nearestX, nearestY, bitMap, scalingFactor):
+        bitMapx = int(self.x/scalingFactor)
         dx = self.x - nearestX
         dy = self.y - nearestY
         rVector = np.array([dx, dy, 0])
@@ -103,3 +104,18 @@ def getPositions(file='initPos.csv'):
             y = int(row[1])
             positions.append([x,y])
     return positions
+
+
+def getBitMap(file='data/bitmap.csv'):
+    bitArray = []
+    with open(file, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            row=[int(i) for i in row]
+            bitArray.append(row)
+
+    return np.asarray(bitArray)
+
+
+a = getBitMap()
+print(a)
