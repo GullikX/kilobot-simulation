@@ -11,23 +11,13 @@ preferedDistance = 50 #Bugged for <= 2 * size
 maxAngleError = np.pi / 36
 
 class Kilobot:
-    counter = 0;
-    def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor):
+    def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
         self.renderer = renderer
         self.x, self.y = startPosition
         self.direction = startDirection
         self.bitMapArray = bitMapArray
         self.bitMapScalingFactor = bitMapScalingFactor
-        self.gradientVal = np.inf    #See paper
-        if Kilobot.counter < 4:
-            if Kilobot.counter == 0:
-                self.gradientVal = 0
-            else:
-                self.gradientVal = 1
-            self.moveVal = 3
-        else:
-            self.moveVal = 0
-        Kilobot.counter += 1
+        self.gradientVal = gradientVal
 
     def _setGradient(self, kilobots):
         minimumGradient = np.inf

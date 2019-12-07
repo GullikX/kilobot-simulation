@@ -31,10 +31,16 @@ def main():
     kilobots = [None] * nKilobots
     for iKilobot in range(nKilobots):
         if iKilobot < nKilobotsOrigin:
-            kilobots[iKilobot] = KilobotOrigin(renderer, initialPositions[iKilobot], 0, bitMapArray, bitMapScalingFactor)
+            startAngle = 0
+            if iKilobot == 0:
+                gradientVal = 0
+            else:
+                gradientVal = 1
+            kilobots[iKilobot] = KilobotOrigin(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
         else:
             startAngle = random.uniform(0, 2*np.pi)
-            kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor)
+            gradientVal = np.inf
+            kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
 
     while running:
         # Input
