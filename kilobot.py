@@ -16,8 +16,8 @@ class Kilobot:
         self.renderer = renderer
         self.x, self.y = startPosition
         self.direction = startDirection
-        self.bitMapArray = bitMapArray
-        self.bitMapScalingFactor = bitMapScalingFactor
+        self.bitMapArray = bitMapArray.repeat(bitMapScalingFactor,0).repeat(bitMapScalingFactor, 1)
+        self.scalingFactor = bitMapScalingFactor
         self.gradientVal = np.inf    #See paper
         if Kilobot.counter < 4:
             if Kilobot.counter == 0:
@@ -45,13 +45,14 @@ class Kilobot:
     def timestep(self, deltaTime, kilobots):
         self._setGradient(kilobots)
         nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
-        bitMapVal = self._getBinaryCoord()
+        bitMapVal = 0
+        if self.x >= 0 and self.y >= 0 and self.x < \
+            self.bitMapArray.shape[0] and self.y < self.bitMapArray.shape[1]:
+            x = int(self.x)
+            y = int(self.y)
+            bitMapVal = self.bitMapArray[x,y]
         if bitMapVal == 0:  #move into position
             self._move(deltaTime, nearestRobotX, nearestRobotY)
-            bitMapVal = self._getBinaryCoord()
-            while bitMapVal == 1:      #move until we leave bitShape
-                self._move(deltaTime, nearestRobotX, nearestRobotY)
-                bitMapVal = self._getBinaryCoord()
 
     def _findClosest(self, deltaTime, kilobots):
         rmax = 100
@@ -67,14 +68,14 @@ class Kilobot:
                     nearestY = bot.y
         return nearestX, nearestY
 
-
-
     def _move(self, deltaTime, nearestX, nearestY):
         dx = self.x - nearestX
         dy = self.y - nearestY
         rVector = np.array([dx, dy, 0])
         w = np.cross(rVector, np.array([0, 0, 1]))
-        tempVector = w / np.sqrt( np.dot(w, w) ) + ( preferedDistance - np.sqrt(dx**2 + dy**2) ) / ( preferedDistance - 2 * size ) * rVector / np.sqrt(np.dot(rVector,rVector))
+        tempVector = w / np.sqrt( np.dot(w, w) ) +  \
+                (preferedDistance - np.sqrt(dx**2 + dy**2) ) / \
+                ( preferedDistance - 2 * size ) * rVector / np.sqrt(np.dot(rVector,rVector))
         preferedDirectionVector = tempVector / np.sqrt( np.dot(tempVector, tempVector) )
 
         directionVector = np.array([np.cos(self.direction), np.sin(self.direction), 0])
@@ -100,17 +101,7 @@ class Kilobot:
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/5)
         self.renderer.drawText((255, 0, 0), str(self.gradientVal), position)
 
-    def _getBinaryCoord(self):
-        bitMapVal = 0
-        if self.x >= 0 and  self.y >= 0:
-            bitMapX = int(self.x/self.bitMapScalingFactor)
-            bitMapY = int(self.y/self.bitMapScalingFactor)
 
-            bitShape = self.bitMapArray.shape
-            if bitMapX >= 0 and bitMapX < bitShape[0] and bitMapY >= 0 and bitMapY < bitShape[1]:
-                print(bitMapX, bitMapY)
-                bitMapVal = self.bitMapArray[bitMapX, bitMapY]
-        return bitMapVal
 
 
 class KilobotOrigin(Kilobot):
