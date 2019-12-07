@@ -1,8 +1,10 @@
+from enum import Enum
 import numpy as np
+import random
 
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
-size =15
+size = 15
 velocity = 1
 turnSpeed = np.pi / 36
 communicationRange = 60
@@ -10,23 +12,22 @@ communicationRange = 60
 preferedDistance = 50 #Bugged for <= 2 * size
 maxAngleError = np.pi / 36
 
+
+class State(Enum):
+    WAIT_TO_MOVE = 1
+    MOVING = 2
+    JOINED_SHAPE = 3
+
+
 class Kilobot:
     def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
         self.renderer = renderer
         self.x, self.y = startPosition
         self.direction = startDirection
         self.bitMapArray = bitMapArray.repeat(bitMapScalingFactor,0).repeat(bitMapScalingFactor, 1)
-        self.scalingFactor = bitMapScalingFactor
-        self.gradientVal = np.inf    #See paper
-        if Kilobot.counter < 4:
-            if Kilobot.counter == 0:
-                self.gradientVal = 0
-            else:
-                self.gradientVal = 1
-            self.moveVal = 3
-        else:
-            self.moveVal = 0
-        Kilobot.counter += 1
+        self.bitMapScalingFactor = bitMapScalingFactor
+        self.gradientVal = gradientVal
+        self.state = State.WAIT_TO_MOVE
 
     def _setGradient(self, kilobots):
         minimumGradient = np.inf
@@ -43,15 +44,22 @@ class Kilobot:
 
     def timestep(self, deltaTime, kilobots):
         self._setGradient(kilobots)
-        nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
-        bitMapVal = 0
-        if self.x >= 0 and self.y >= 0 and self.x < \
-            self.bitMapArray.shape[0] and self.y < self.bitMapArray.shape[1]:
-            x = int(self.x)
-            y = int(self.y)
-            bitMapVal = self.bitMapArray[x,y]
-        if bitMapVal == 0:  #move into position
-            self._move(deltaTime, nearestRobotX, nearestRobotY)
+        if self.state == State.WAIT_TO_MOVE:
+            # Start to move randomly, fix later
+            if random.random() < 0.005:
+                self.state = State.MOVING
+        elif self.state == State.MOVING:
+            nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
+            bitMapVal = 0
+            if self.x >= 0 and self.y >= 0 and self.x < \
+                self.bitMapArray.shape[0] and self.y < self.bitMapArray.shape[1]:
+                x = int(self.x)
+                y = int(self.y)
+                bitMapVal = self.bitMapArray[x,y]
+            if bitMapVal == 0:  #move into position
+                self._move(deltaTime, nearestRobotX, nearestRobotY)
+        elif self.state == State.JOINED_SHAPE:
+            pass  # do nothing
 
     def _findClosest(self, deltaTime, kilobots):
         rmax = 100
@@ -90,7 +98,6 @@ class Kilobot:
 
 
     def draw(self):
-
         position = (int(self.x), int(self.y))
         directionLineTarget = (
             int(self.x + np.cos(self.direction) * size),
@@ -98,11 +105,22 @@ class Kilobot:
         )
         self.renderer.drawCircle(colorBody, position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/5)
-        self.renderer.drawText((255, 0, 0), str(self.gradientVal), position)
+
+        if self.state == State.WAIT_TO_MOVE:
+            textColor = (255, 0, 0)
+        elif self.state == State.MOVING:
+            textColor = (255, 255, 0)
+        elif self.state == State.JOINED_SHAPE:
+            textColor = (0, 255, 0)
+        self.renderer.drawText(textColor, str(self.gradientVal), position)
 
 
 
 
 class KilobotOrigin(Kilobot):
+    def __init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
+        Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal)
+        self.state = State.JOINED_SHAPE
+
     def timestep(self, deltaTime, kilobots):
         pass
