@@ -1,6 +1,7 @@
 from enum import Enum
 import numpy as np
 import random
+
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
 size = 15
@@ -45,7 +46,7 @@ class Kilobot:
         return neighbors
 
     def timestep(self, deltaTime, kilobots):
-        # Get neighbor gradients and id:s
+        # Calculate gradient value
         neighbors = self._getNeighbors(kilobots)
         neighborGradients = [None] * len(neighbors)
         for i in range(len(neighbors)):
@@ -58,36 +59,20 @@ class Kilobot:
             maxNeighborGradient = max(neighborGradients)
         self.gradientVal = minNeighborGradient + 1
 
-        neighborIdsWithSameGradient = []
-        for i in range(len(neighbors)):
-            if neighbors[i].gradientVal == self.gradientVal:
-                neighborIdsWithSameGradient.append(neighbors[i].id)
-        if len(neighborIdsWithSameGradient) == 0:
-            maxNeighborIdWithSameGradient = np.inf
-        else:
-            maxNeighborIdWithSameGradient = max(neighborIdsWithSameGradient)
-
-
         if self.state == State.WAIT_TO_MOVE:
-            # Start to move randomly, fix later
+            neighborIdsWithSameGradient = []
+            for i in range(len(neighbors)):
+                if neighbors[i].gradientVal == self.gradientVal:
+                    neighborIdsWithSameGradient.append(neighbors[i].id)
+            if len(neighborIdsWithSameGradient) == 0:
+                maxNeighborIdWithSameGradient = np.inf
+            else:
+                maxNeighborIdWithSameGradient = max(neighborIdsWithSameGradient)
+
             if self.gradientVal > maxNeighborGradient or (self.gradientVal == maxNeighborGradient and self.id > maxNeighborIdWithSameGradient):
                 self.state = State.MOVING
+
         elif self.state == State.MOVING:
-<<<<<<< HEAD
-            nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
-            bitMapVal = 0
-            xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
-            yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
-            if self.x >= 0 and self.y >= 0 and self.x < xDim and self.y  < yDim:
-                x = int(self.x/self.bitMapScalingFactor)
-                y = int(self.y/self.bitMapScalingFactor)
-                bitMapVal = self.bitMapArray[x,y]
-                isOnEdge = self.isOnEdge(bitMapVal, deltaTime)
-            if bitMapVal == 0:  #move into position
-                self._move(deltaTime, nearestRobotX, nearestRobotY)
-            elif bitMapVal ==1 and isOnEdge == False:
-                self._move(deltaTime, nearestRobotX, nearestRobotY)
-=======
             closestRobot = self._findClosestRobot(deltaTime, kilobots)
             if self._isInsideShape():
                 if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
@@ -97,7 +82,6 @@ class Kilobot:
             else:
                 self._move(deltaTime, closestRobot.x, closestRobot.y)
 
->>>>>>> b6d033ae5677f8639fe4aea87524c51ae900e74a
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
 
@@ -115,23 +99,6 @@ class Kilobot:
         xfuture = self.x + velocity*dt*np.cos(self.direction)
         yfuture = self.y + velocity*dt*np.sin(self.direction)
 
-<<<<<<< HEAD
-        if bitMapVal == 1:
-
-            xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
-            yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
-            if xfuture >= 0 and yfuture >= 0 and xfuture < xDim and yfuture < yDim:
-                yfuture2 = int(yfuture/self.bitMapScalingFactor)
-                xfuture2 = int(xfuture/self.bitMapScalingFactor)
-                nextVal = self.bitMapArray[xfuture2,yfuture2]
-                if nextVal == 0:
-                    return True #we are on the edge stop fucking MOVING
-            elif xfuture < 0 or yfuture < 0 or xfuture >= xDim or yfuture >= yDim:
-                return True
-        return False
-
-    def _findClosest(self, deltaTime, kilobots):
-=======
         xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
         yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
         if xfuture >= 0 and yfuture >= 0 and xfuture < xDim and yfuture < yDim:
@@ -144,7 +111,6 @@ class Kilobot:
             return True
 
     def _findClosestRobot(self, deltaTime, kilobots):
->>>>>>> b6d033ae5677f8639fe4aea87524c51ae900e74a
         rmax = 100
         closestBot = None
         nearestX = 1
