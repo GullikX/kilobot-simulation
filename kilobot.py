@@ -29,8 +29,8 @@ class Kilobot:
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
 
-    def _setGradient(self, kilobots):
-        minimumGradient = np.inf
+    def _getNeighborGradients(self, kilobots):
+        neighborGradients = []
         for bot in kilobots:
             if bot is self:
                 continue
@@ -38,15 +38,24 @@ class Kilobot:
             yDiff = self.y - bot.y
             dist = np.sqrt(xDiff**2 + yDiff**2)
 
-            if dist <= communicationRange and bot.gradientVal < minimumGradient:
-                minimumGradient = bot.gradientVal
-        self.gradientVal = 1 + minimumGradient
+            if dist <= communicationRange:
+                neighborGradients.append(bot.gradientVal)
+        return sorted(neighborGradients)
 
     def timestep(self, deltaTime, kilobots):
-        self._setGradient(kilobots)
+        # Calculate gradient
+        neighborGradients = self._getNeighborGradients(kilobots)
+        if len(neighborGradients) == 0:
+            minNeighborGradient = np.inf
+            maxNeighborGradient = np.inf
+        else:
+            minNeighborGradient = neighborGradients[0]
+            maxNeighborGradient = neighborGradients[-1]
+        self.gradientVal = minNeighborGradient + 1
+
         if self.state == State.WAIT_TO_MOVE:
             # Start to move randomly, fix later
-            if random.random() < 0.005:
+            if self.gradientVal > maxNeighborGradient or (self.gradientVal == maxNeighborGradient and random.random() < 0.005):
                 self.state = State.MOVING
         elif self.state == State.MOVING:
             nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
