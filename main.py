@@ -10,7 +10,6 @@ from renderer import Renderer
 windowSize = (1280, 720)
 fps = 60
 deltaTime = 1
-nKilobots = 10
 nKilobotsOrigin = 4
 bitMapFile = "data/bitmap.csv"
 bitMapScalingFactor = 100
@@ -28,6 +27,7 @@ def main():
     running = True
 
     # Create kilobots
+    nKilobots = np.shape(initialPositions)[0]
     kilobots = [None] * nKilobots
     for iKilobot in range(nKilobots):
         if iKilobot < nKilobotsOrigin:
