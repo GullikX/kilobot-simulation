@@ -11,8 +11,7 @@ preferedDistance = 50 #Bugged for <= 2 * size
 maxAngleError = np.pi / 36
 
 class Kilobot:
-    counter = 0;
-    def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor):
+    def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
         self.renderer = renderer
         self.x, self.y = startPosition
         self.direction = startDirection
