@@ -1,7 +1,6 @@
 from enum import Enum
 import numpy as np
 import random
-
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
 size = 15
@@ -9,7 +8,7 @@ velocity = 1
 turnSpeed = np.pi / 36
 communicationRange = 60
 
-preferedDistance = 40 #Bugged for <= 2 * size
+preferedDistance = 35 #Bugged for <= 2 * size
 maxAngleError = np.pi / 36
 
 
@@ -22,9 +21,10 @@ class State(Enum):
 class Kilobot:
     def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
         self.renderer = renderer
-        self.x, self.y = startPosition
+
+        self.x = startPosition[0,0]
+        self.y = startPosition[0,1]
         self.direction = startDirection
-        #self.bitMapArray = bitMapArray.repeat(bitMapScalingFactor,0).repeat(bitMapScalingFactor, 1)
         self.bitMapArray = np.flip(bitMapArray, 0)
         self.bitMapScalingFactor = bitMapScalingFactor
         self.gradientVal = gradientVal
@@ -45,7 +45,7 @@ class Kilobot:
         return neighbors
 
     def timestep(self, deltaTime, kilobots):
-        # Calculate gradient value
+        # Get neighbor gradients and id:s
         neighbors = self._getNeighbors(kilobots)
 
         neighborGradients = [None] * len(neighbors)
@@ -59,19 +59,20 @@ class Kilobot:
             maxNeighborGradient = max(neighborGradients)
         self.gradientVal = minNeighborGradient + 1
 
-        if self.state == State.WAIT_TO_MOVE:
-            neighborIdsWithSameGradient = []
-            for i in range(len(neighbors)):
-                if neighbors[i].gradientVal == self.gradientVal:
-                    neighborIdsWithSameGradient.append(neighbors[i].id)
-            if len(neighborIdsWithSameGradient) == 0:
-                maxNeighborIdWithSameGradient = np.inf
-            else:
-                maxNeighborIdWithSameGradient = max(neighborIdsWithSameGradient)
+        neighborIdsWithSameGradient = []
+        for i in range(len(neighbors)):
+            if neighbors[i].gradientVal == self.gradientVal:
+                neighborIdsWithSameGradient.append(neighbors[i].id)
+        if len(neighborIdsWithSameGradient) == 0:
+            maxNeighborIdWithSameGradient = np.inf
+        else:
+            maxNeighborIdWithSameGradient = max(neighborIdsWithSameGradient)
 
+
+        if self.state == State.WAIT_TO_MOVE:
+            # Start to move randomly, fix later
             if self.gradientVal > maxNeighborGradient or (self.gradientVal == maxNeighborGradient and self.id > maxNeighborIdWithSameGradient):
                 self.state = State.MOVING
-
         elif self.state == State.MOVING:
             nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
             bitMapVal = 0
@@ -86,7 +87,6 @@ class Kilobot:
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
             elif bitMapVal ==1 and isOnEdge == False:
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
-
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
 
@@ -95,14 +95,13 @@ class Kilobot:
         yfuture = self.y + velocity*dt*np.sin(self.direction)
 
         if bitMapVal == 1:
+
             xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
             yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
             if xfuture >= 0 and yfuture >= 0 and xfuture < xDim and yfuture < yDim:
                 yfuture2 = int(yfuture/self.bitMapScalingFactor)
                 xfuture2 = int(xfuture/self.bitMapScalingFactor)
                 nextVal = self.bitMapArray[xfuture2,yfuture2]
-                print(xfuture2, yfuture2, nextVal)
-                print(self.bitMapArray)
                 if nextVal == 0:
                     return True #we are on the edge stop fucking MOVING
             elif xfuture < 0 or yfuture < 0 or xfuture >= xDim or yfuture >= yDim:
@@ -172,3 +171,21 @@ class KilobotOrigin(Kilobot):
 
     def timestep(self, deltaTime, kilobots):
         pass
+
+
+def generateBotCoords(nrOfBots,preferedDistance):
+    fourInitial = [[-1/2,0],[0, -np.sqrt(3)/2],
+                    [1/2,0], [0, np.sqrt(3)/2]]
+    p = np.array([-1/2, np.sqrt(3)])
+    k = int(nrOfBots**(2/3))
+    for i in range(4,nrOfBots):
+        j = i - 4
+        a = int(j/k)
+        b = int(j%k)
+        currentPos = p + np.array([1,0])*b + np.array([1/2, np.sqrt(3)/2])*a
+        currentPos = np.ndarray.tolist(currentPos)
+        fourInitial.append(currentPos)
+    listOfBots = np.asarray([fourInitial])
+    listOfBots = -listOfBots*preferedDistance
+    listOfBots = np.asmatrix(listOfBots)
+    return listOfBots

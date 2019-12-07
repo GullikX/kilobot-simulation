@@ -4,7 +4,7 @@ import numpy as np
 import random
 import sys
 
-from kilobot import Kilobot, KilobotOrigin
+from kilobot import Kilobot, KilobotOrigin, generateBotCoords
 from renderer import Renderer
 
 windowSize = (1280, 720)
@@ -18,8 +18,8 @@ initialPositionsFile = "data/initPos.csv"
 def main():
     # Load data arrays
     bitMapArray = np.loadtxt(bitMapFile)
-    initialPositions = np.loadtxt(initialPositionsFile)
-
+#    initialPositions = np.loadtxt(initialPositionsFile)
+    initialPositions = generateBotCoords(100, 35)
     # Init pygame
     pygame.init()
     fpsClock = pygame.time.Clock()
