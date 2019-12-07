@@ -9,7 +9,7 @@ velocity = 1
 turnSpeed = np.pi / 36
 communicationRange = 60
 
-preferedDistance = 40 #Bugged for <= 2 * size
+preferedDistance = 35 #Bugged for <= 2 * size
 maxAngleError = np.pi / 36
 
 
