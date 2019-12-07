@@ -45,7 +45,7 @@ class Kilobot:
         return neighbors
 
     def timestep(self, deltaTime, kilobots):
-        # Get neighbor gradients and id:s
+        # Calculate gradient value
         neighbors = self._getNeighbors(kilobots)
 
         neighborGradients = [None] * len(neighbors)
@@ -59,20 +59,19 @@ class Kilobot:
             maxNeighborGradient = max(neighborGradients)
         self.gradientVal = minNeighborGradient + 1
 
-        neighborIdsWithSameGradient = []
-        for i in range(len(neighbors)):
-            if neighbors[i].gradientVal == self.gradientVal:
-                neighborIdsWithSameGradient.append(neighbors[i].id)
-        if len(neighborIdsWithSameGradient) == 0:
-            maxNeighborIdWithSameGradient = np.inf
-        else:
-            maxNeighborIdWithSameGradient = max(neighborIdsWithSameGradient)
-
-
         if self.state == State.WAIT_TO_MOVE:
-            # Start to move randomly, fix later
+            neighborIdsWithSameGradient = []
+            for i in range(len(neighbors)):
+                if neighbors[i].gradientVal == self.gradientVal:
+                    neighborIdsWithSameGradient.append(neighbors[i].id)
+            if len(neighborIdsWithSameGradient) == 0:
+                maxNeighborIdWithSameGradient = np.inf
+            else:
+                maxNeighborIdWithSameGradient = max(neighborIdsWithSameGradient)
+
             if self.gradientVal > maxNeighborGradient or (self.gradientVal == maxNeighborGradient and self.id > maxNeighborIdWithSameGradient):
                 self.state = State.MOVING
+
         elif self.state == State.MOVING:
             nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
             bitMapVal = 0
@@ -88,6 +87,7 @@ class Kilobot:
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
             elif bitMapVal ==1 and isOnEdge == False:
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
+
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
 
