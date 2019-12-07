@@ -9,7 +9,7 @@ velocity = 1
 turnSpeed = np.pi / 36
 communicationRange = 60
 
-preferedDistance = 50 #Bugged for <= 2 * size
+preferedDistance = 40 #Bugged for <= 2 * size
 maxAngleError = np.pi / 36
 
 
@@ -76,7 +76,9 @@ class Kilobot:
         elif self.state == State.MOVING:
             nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
             bitMapVal = 0
-            if self.x >= 0 and self.y >= 0:
+            xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
+            yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
+            if self.x >= 0 and self.y >= 0 and self.x < xDim and self.y  < yDim:
                 x = int(self.x/self.bitMapScalingFactor)
                 y = int(self.y/self.bitMapScalingFactor)
                 bitMapVal = self.bitMapArray[x,y]
@@ -94,14 +96,16 @@ class Kilobot:
         yfuture = self.y + velocity*dt*np.sin(self.direction)
 
         if bitMapVal == 1:
-            if xfuture >= 0 and yfuture >= 0:
+            xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
+            yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
+            if xfuture >= 0 and yfuture >= 0 and xfuture < xDim and yfuture < yDim:
                 yfuture = int(yfuture/self.bitMapScalingFactor)
                 xfuture = int(xfuture/self.bitMapScalingFactor)
                 nextVal = self.bitMapArray[xfuture,yfuture]
                 print(xfuture, yfuture, nextVal)
                 if nextVal == 0:
                     return True #we are on the edge stop fucking MOVING
-            elif xfuture < 0 or yfuture < 0:
+            elif xfuture < 0 or yfuture < 0 or xfuture >= xDim or yfuture >= yDim:
                 return True
         return False
 
