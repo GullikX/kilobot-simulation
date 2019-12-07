@@ -47,7 +47,6 @@ class Kilobot:
     def timestep(self, deltaTime, kilobots):
         # Calculate gradient value
         neighbors = self._getNeighbors(kilobots)
-
         neighborGradients = [None] * len(neighbors)
         for i in range(len(neighbors)):
             neighborGradients[i] = neighbors[i].gradientVal
@@ -73,11 +72,11 @@ class Kilobot:
                 self.state = State.MOVING
 
         elif self.state == State.MOVING:
-            nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
-            if not self._isInsideShape():  #move into position
+            if not self._isInsideShape() or (self._isInsideShape() and not self._isOnEdge(deltaTime)):
+                nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
-            elif self._isInsideShape() and not self._isOnEdge(deltaTime):
-                self._move(deltaTime, nearestRobotX, nearestRobotY)
+            elif self._isInsideShape() and self._isOnEdge(deltaTime):
+                self.state = State.JOINED_SHAPE
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
