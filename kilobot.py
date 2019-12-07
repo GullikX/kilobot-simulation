@@ -72,11 +72,14 @@ class Kilobot:
                 self.state = State.MOVING
 
         elif self.state == State.MOVING:
-            if not self._isInsideShape() or (self._isInsideShape() and not self._isOnEdge(deltaTime)):
-                nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
-                self._move(deltaTime, nearestRobotX, nearestRobotY)
-            elif self._isInsideShape() and self._isOnEdge(deltaTime):
-                self.state = State.JOINED_SHAPE
+            closestRobot = self._findClosestRobot(deltaTime, kilobots)
+            if self._isInsideShape():
+                if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
+                    self.state = State.JOINED_SHAPE
+                else:
+                    self._move(deltaTime, closestRobot.x, closestRobot.y)
+            else:
+                self._move(deltaTime, closestRobot.x, closestRobot.y)
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
@@ -106,8 +109,9 @@ class Kilobot:
         elif xfuture < 0 or yfuture < 0 or xfuture >= xDim or yfuture >= yDim:
             return True
 
-    def _findClosest(self, deltaTime, kilobots):
+    def _findClosestRobot(self, deltaTime, kilobots):
         rmax = 100
+        closestBot = None
         nearestX = 1
         nearestY = 1
 
@@ -116,9 +120,8 @@ class Kilobot:
                 r = np.sqrt( (self.x - bot.x)**2 + (self.y - bot.y)**2 )
                 if r < rmax:
                     rmax = r
-                    nearestX = bot.x
-                    nearestY = bot.y
-        return nearestX, nearestY
+                    closestBot = bot
+        return closestBot
 
     def _move(self, deltaTime, nearestX, nearestY):
         dx = self.x - nearestX
