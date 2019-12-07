@@ -25,7 +25,7 @@ class Kilobot:
         self.x, self.y = startPosition
         self.direction = startDirection
         #self.bitMapArray = bitMapArray.repeat(bitMapScalingFactor,0).repeat(bitMapScalingFactor, 1)
-        self.bitMapArray = bitMapArray
+        self.bitMapArray = np.flip(bitMapArray, 0)
         self.bitMapScalingFactor = bitMapScalingFactor
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
@@ -82,7 +82,6 @@ class Kilobot:
                 x = int(self.x/self.bitMapScalingFactor)
                 y = int(self.y/self.bitMapScalingFactor)
                 bitMapVal = self.bitMapArray[x,y]
-                print(x,y, bitMapVal)
                 isOnEdge = self.isOnEdge(bitMapVal, deltaTime)
             if bitMapVal == 0:  #move into position
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
@@ -99,10 +98,11 @@ class Kilobot:
             xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
             yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
             if xfuture >= 0 and yfuture >= 0 and xfuture < xDim and yfuture < yDim:
-                yfuture = int(yfuture/self.bitMapScalingFactor)
-                xfuture = int(xfuture/self.bitMapScalingFactor)
-                nextVal = self.bitMapArray[xfuture,yfuture]
-                print(xfuture, yfuture, nextVal)
+                yfuture2 = int(yfuture/self.bitMapScalingFactor)
+                xfuture2 = int(xfuture/self.bitMapScalingFactor)
+                nextVal = self.bitMapArray[xfuture2,yfuture2]
+                print(xfuture2, yfuture2, nextVal)
+                print(self.bitMapArray)
                 if nextVal == 0:
                     return True #we are on the edge stop fucking MOVING
             elif xfuture < 0 or yfuture < 0 or xfuture >= xDim or yfuture >= yDim:
