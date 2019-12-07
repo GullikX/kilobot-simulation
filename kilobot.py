@@ -56,10 +56,24 @@ class Kilobot:
                 x = int(self.x)
                 y = int(self.y)
                 bitMapVal = self.bitMapArray[x,y]
+                isOnEdge = self.isOnEdge(bitMapVal, deltaTime)
             if bitMapVal == 0:  #move into position
+                self._move(deltaTime, nearestRobotX, nearestRobotY)
+            elif bitMapVal ==1 and isOnEdge == False:
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
+
+    def isOnEdge(self, bitMapVal, dt):
+        xfuture = int(round(velocity*dt*np.cos(self.direction)))
+        yfuture = int(round(velocity*dt*np.sin(self.direction)))
+
+        if bitMapVal == 1:
+            nextVal = self.bitMapArray[xfuture,yfuture]
+
+            if nextVal == 0:
+                return True #we are on the edge stop fucking MOVING
+        return False
 
     def _findClosest(self, deltaTime, kilobots):
         rmax = 100
