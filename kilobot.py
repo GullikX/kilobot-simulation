@@ -24,7 +24,8 @@ class Kilobot:
         self.renderer = renderer
         self.x, self.y = startPosition
         self.direction = startDirection
-        self.bitMapArray = bitMapArray.repeat(bitMapScalingFactor,0).repeat(bitMapScalingFactor, 1)
+        #self.bitMapArray = bitMapArray.repeat(bitMapScalingFactor,0).repeat(bitMapScalingFactor, 1)
+        self.bitMapArray = bitMapArray
         self.bitMapScalingFactor = bitMapScalingFactor
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
@@ -60,11 +61,11 @@ class Kilobot:
         elif self.state == State.MOVING:
             nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
             bitMapVal = 0
-            if self.x >= 0 and self.y >= 0 and self.x < \
-                self.bitMapArray.shape[0] and self.y < self.bitMapArray.shape[1]:
-                x = int(self.x)
-                y = int(self.y)
+            if self.x >= 0 and self.y >= 0:
+                x = int(self.x/self.bitMapScalingFactor)
+                y = int(self.y/self.bitMapScalingFactor)
                 bitMapVal = self.bitMapArray[x,y]
+                print(x,y, bitMapVal)
                 isOnEdge = self.isOnEdge(bitMapVal, deltaTime)
             if bitMapVal == 0:  #move into position
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
@@ -74,14 +75,19 @@ class Kilobot:
             pass  # do nothing
 
     def isOnEdge(self, bitMapVal, dt):
-        xfuture = int(round(velocity*dt*np.cos(self.direction)))
-        yfuture = int(round(velocity*dt*np.sin(self.direction)))
+        xfuture = self.x + velocity*dt*np.cos(self.direction)
+        yfuture = self.y + velocity*dt*np.sin(self.direction)
 
         if bitMapVal == 1:
-            nextVal = self.bitMapArray[xfuture,yfuture]
-
-            if nextVal == 0:
-                return True #we are on the edge stop fucking MOVING
+            if xfuture >= 0 and yfuture >= 0:
+                yfuture = int(yfuture/self.bitMapScalingFactor)
+                xfuture = int(xfuture/self.bitMapScalingFactor)
+                nextVal = self.bitMapArray[xfuture,yfuture]
+                print(xfuture, yfuture, nextVal)
+                if nextVal == 0:
+                    return True #we are on the edge stop fucking MOVING
+            elif xfuture < 0 or yfuture < 0:
+                return True
         return False
 
     def _findClosest(self, deltaTime, kilobots):
