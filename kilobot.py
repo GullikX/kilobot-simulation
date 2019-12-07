@@ -47,7 +47,6 @@ class Kilobot:
     def timestep(self, deltaTime, kilobots):
         # Get neighbor gradients and id:s
         neighbors = self._getNeighbors(kilobots)
-
         neighborGradients = [None] * len(neighbors)
         for i in range(len(neighbors)):
             neighborGradients[i] = neighbors[i].gradientVal
@@ -74,6 +73,7 @@ class Kilobot:
             if self.gradientVal > maxNeighborGradient or (self.gradientVal == maxNeighborGradient and self.id > maxNeighborIdWithSameGradient):
                 self.state = State.MOVING
         elif self.state == State.MOVING:
+<<<<<<< HEAD
             nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
             bitMapVal = 0
             xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
@@ -87,13 +87,35 @@ class Kilobot:
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
             elif bitMapVal ==1 and isOnEdge == False:
                 self._move(deltaTime, nearestRobotX, nearestRobotY)
+=======
+            closestRobot = self._findClosestRobot(deltaTime, kilobots)
+            if self._isInsideShape():
+                if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
+                    self.state = State.JOINED_SHAPE
+                else:
+                    self._move(deltaTime, closestRobot.x, closestRobot.y)
+            else:
+                self._move(deltaTime, closestRobot.x, closestRobot.y)
+
+>>>>>>> b6d033ae5677f8639fe4aea87524c51ae900e74a
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
 
-    def isOnEdge(self, bitMapVal, dt):
+    def _isInsideShape(self):
+        xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
+        yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
+        if self.x >= 0 and self.y >= 0 and self.x < xDim and self.y  < yDim:
+            x = int(self.x/self.bitMapScalingFactor)
+            y = int(self.y/self.bitMapScalingFactor)
+            bitMapVal = self.bitMapArray[x,y]
+            return bool(bitMapVal)
+        return False
+
+    def _isOnEdge(self, dt):
         xfuture = self.x + velocity*dt*np.cos(self.direction)
         yfuture = self.y + velocity*dt*np.sin(self.direction)
 
+<<<<<<< HEAD
         if bitMapVal == 1:
 
             xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
@@ -109,7 +131,22 @@ class Kilobot:
         return False
 
     def _findClosest(self, deltaTime, kilobots):
+=======
+        xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
+        yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
+        if xfuture >= 0 and yfuture >= 0 and xfuture < xDim and yfuture < yDim:
+            yfuture2 = int(yfuture/self.bitMapScalingFactor)
+            xfuture2 = int(xfuture/self.bitMapScalingFactor)
+            nextVal = self.bitMapArray[xfuture2,yfuture2]
+            if nextVal == 0:
+                return True #we are on the edge stop fucking MOVING
+        elif xfuture < 0 or yfuture < 0 or xfuture >= xDim or yfuture >= yDim:
+            return True
+
+    def _findClosestRobot(self, deltaTime, kilobots):
+>>>>>>> b6d033ae5677f8639fe4aea87524c51ae900e74a
         rmax = 100
+        closestBot = None
         nearestX = 1
         nearestY = 1
 
@@ -118,9 +155,8 @@ class Kilobot:
                 r = np.sqrt( (self.x - bot.x)**2 + (self.y - bot.y)**2 )
                 if r < rmax:
                     rmax = r
-                    nearestX = bot.x
-                    nearestY = bot.y
-        return nearestX, nearestY
+                    closestBot = bot
+        return closestBot
 
     def _move(self, deltaTime, nearestX, nearestY):
         dx = self.x - nearestX
