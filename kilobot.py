@@ -29,9 +29,10 @@ class Kilobot:
         self.bitMapScalingFactor = bitMapScalingFactor
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
+        self.id = random.random()  # very idealistic
 
-    def _getNeighborGradients(self, kilobots):
-        neighborGradients = []
+    def _getNeighbors(self, kilobots):
+        neighbors = []
         for bot in kilobots:
             if bot is self:
                 continue
@@ -40,23 +41,37 @@ class Kilobot:
             dist = np.sqrt(xDiff**2 + yDiff**2)
 
             if dist <= communicationRange:
-                neighborGradients.append(bot.gradientVal)
-        return sorted(neighborGradients)
+                neighbors.append(bot)
+        return neighbors
 
     def timestep(self, deltaTime, kilobots):
-        # Calculate gradient
-        neighborGradients = self._getNeighborGradients(kilobots)
+        # Get neighbor gradients and id:s
+        neighbors = self._getNeighbors(kilobots)
+
+        neighborGradients = [None] * len(neighbors)
+        for i in range(len(neighbors)):
+            neighborGradients[i] = neighbors[i].gradientVal
         if len(neighborGradients) == 0:
             minNeighborGradient = np.inf
             maxNeighborGradient = np.inf
         else:
-            minNeighborGradient = neighborGradients[0]
-            maxNeighborGradient = neighborGradients[-1]
+            minNeighborGradient = min(neighborGradients)
+            maxNeighborGradient = max(neighborGradients)
         self.gradientVal = minNeighborGradient + 1
+
+        neighborIdsWithSameGradient = []
+        for i in range(len(neighbors)):
+            if neighbors[i].gradientVal == self.gradientVal:
+                neighborIdsWithSameGradient.append(neighbors[i].id)
+        if len(neighborIdsWithSameGradient) == 0:
+            maxNeighborIdWithSameGradient = np.inf
+        else:
+            maxNeighborIdWithSameGradient = max(neighborIdsWithSameGradient)
+
 
         if self.state == State.WAIT_TO_MOVE:
             # Start to move randomly, fix later
-            if self.gradientVal > maxNeighborGradient or (self.gradientVal == maxNeighborGradient and random.random() < 0.005):
+            if self.gradientVal > maxNeighborGradient or (self.gradientVal == maxNeighborGradient and self.id > maxNeighborIdWithSameGradient):
                 self.state = State.MOVING
         elif self.state == State.MOVING:
             nearestRobotX, nearestRobotY = self._findClosest(deltaTime, kilobots)
