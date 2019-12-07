@@ -6,7 +6,7 @@ bitMapColor = (50, 50, 50)
 windowCaption = "Kilobot simulation"
 
 scaleFactor = 1.25
-fontSizeFactor = 25
+fontSizeFactor = 15
 xOffset = 640
 yOffset = 360
 yFlip = -1
