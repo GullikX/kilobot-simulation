@@ -4,13 +4,15 @@ import random
 
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
+
 size = 15
 velocity = 1
-turnSpeed = np.pi / 36
-communicationRange = 60
+turnSpeed = np.pi / 30
+communicationRange = 100
 
 preferedDistance = 35 #Bugged for <= 2 * size
-maxAngleError = np.pi / 36
+maxAngleError = np.pi / 30
+gradientCommunicationRange = preferedDistance + 15
 
 
 class State(Enum):
@@ -41,7 +43,7 @@ class Kilobot:
             yDiff = self.y - bot.y
             dist = np.sqrt(xDiff**2 + yDiff**2)
 
-            if dist <= communicationRange:
+            if dist <= gradientCommunicationRange:
                 neighbors.append(bot)
         return neighbors
 
@@ -140,7 +142,7 @@ class Kilobot:
         if choiceVector < np.cos(maxAngleError):
             w = np.cross(directionVector, np.array([0, 0, 1]))
             tempVector = np.dot(w,preferedDirectionVector)
-            self.direction -= turnSpeed * tempVector / np.sqrt( np.dot(tempVector, tempVector) )
+            self.direction -= turnSpeed * deltaTime * tempVector / np.sqrt( np.dot(tempVector, tempVector) )
         else:
             self.x += velocity * deltaTime * np.cos(self.direction)
             self.y += velocity * deltaTime * np.sin(self.direction)
