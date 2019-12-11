@@ -42,6 +42,7 @@ def main():
             gradientVal = np.inf
             kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
 
+    iTimestep = 0
     while running:
         # Input
         for event in pygame.event.get():
@@ -53,7 +54,7 @@ def main():
 
         # Logic
         for kilobot in kilobots:
-            kilobot.timestep(deltaTime, kilobots)
+            kilobot.timestep(iTimestep, deltaTime, kilobots)
 
         # Drawing
         renderer.clearScreen()
@@ -65,6 +66,7 @@ def main():
         # Wait until next frame
         fpsClock.tick(fps)
         #print(f"FPS: {fpsClock.get_fps()}")
+        iTimestep += 1
 
     pygame.display.quit()
     pygame.quit()

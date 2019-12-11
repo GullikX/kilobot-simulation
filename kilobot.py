@@ -9,6 +9,7 @@ size = 15
 velocity = 1
 turnSpeed = np.pi / 30
 communicationRange = 100
+neighborUpdateInterval = 5
 
 preferedDistance = 35 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
@@ -33,6 +34,7 @@ class Kilobot:
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
         self.id = random.random()  # very idealistic
+        self.neighbors = []
 
     def _getNeighbors(self, kilobots):
         neighbors = []
@@ -47,12 +49,13 @@ class Kilobot:
                 neighbors.append(bot)
         return neighbors
 
-    def timestep(self, deltaTime, kilobots):
+    def timestep(self, iTimestep, deltaTime, kilobots):
         # Calculate gradient value
-        neighbors = self._getNeighbors(kilobots)
-        neighborGradients = [None] * len(neighbors)
-        for i in range(len(neighbors)):
-            neighborGradients[i] = neighbors[i].gradientVal
+        if iTimestep % neighborUpdateInterval == 0:  # Increase performance by not updating each frame
+            self.neighbors = self._getNeighbors(kilobots)
+        neighborGradients = [None] * len(self.neighbors)
+        for i in range(len(self.neighbors)):
+            neighborGradients[i] = self.neighbors[i].gradientVal
         if len(neighborGradients) == 0:
             minNeighborGradient = np.inf
             maxNeighborGradient = np.inf
@@ -63,9 +66,9 @@ class Kilobot:
 
         if self.state == State.WAIT_TO_MOVE:
             neighborIdsWithSameGradient = []
-            for i in range(len(neighbors)):
-                if neighbors[i].gradientVal == self.gradientVal:
-                    neighborIdsWithSameGradient.append(neighbors[i].id)
+            for i in range(len(self.neighbors)):
+                if self.neighbors[i].gradientVal == self.gradientVal:
+                    neighborIdsWithSameGradient.append(self.neighbors[i].id)
             if len(neighborIdsWithSameGradient) == 0:
                 maxNeighborIdWithSameGradient = np.inf
             else:
@@ -75,7 +78,7 @@ class Kilobot:
                 self.state = State.MOVING
 
         elif self.state == State.MOVING:
-            closestRobot = self._findClosestRobot(deltaTime, neighbors)
+            closestRobot = self._findClosestRobot(deltaTime, self.neighbors)
             if self._isInsideShape():
                 if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
                     self.state = State.JOINED_SHAPE
@@ -171,7 +174,7 @@ class KilobotOrigin(Kilobot):
         Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal)
         self.state = State.JOINED_SHAPE
 
-    def timestep(self, deltaTime, kilobots):
+    def timestep(self, iTimestep, deltaTime, kilobots):
         pass
 
 
