@@ -19,7 +19,7 @@ def main():
     # Load data arrays
     bitMapArray = np.loadtxt(bitMapFile)
 #    initialPositions = np.loadtxt(initialPositionsFile)
-    initialPositions = generateBotCoords(100, 35)
+    initialPositions = generateBotCoords(20, 35)
     # Init pygame
     pygame.init()
     fpsClock = pygame.time.Clock()
