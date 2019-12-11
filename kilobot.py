@@ -1,6 +1,5 @@
 from enum import Enum
 import numpy as np
-import random
 
 colorBody = (192, 192, 192)
 colorDirectionLine = (25, 118, 210)
