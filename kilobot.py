@@ -32,6 +32,11 @@ class Kilobot:
         self.state = State.WAIT_TO_MOVE
         self.id = random.random()  # very idealistic
 
+    def _getMovePriority(self):
+        if self.state != State.MOVING:
+            return -np.inf
+        return np.arctan2(self.x, self.y)
+
     def _getNeighbors(self, kilobots):
         neighbors = []
         for bot in kilobots:
@@ -73,14 +78,19 @@ class Kilobot:
                 self.state = State.MOVING
 
         elif self.state == State.MOVING:
-            closestRobot = self._findClosestRobot(deltaTime, kilobots)
-            if self._isInsideShape():
-                if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
-                    self.state = State.JOINED_SHAPE
+            neighborMovePriorities = [None] * len(neighbors)
+            for i in range(len(neighbors)):
+                neighborMovePriorities[i] = neighbors[i]._getMovePriority()
+            if len(neighbors) == 0 or self._getMovePriority() > max(neighborMovePriorities):
+                closestRobot = self._findClosestRobot(deltaTime, kilobots)
+                if self._isInsideShape():
+                    if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
+                        self.state = State.JOINED_SHAPE
+                        self.startTime = np.inf
+                    else:
+                        self._move(deltaTime, closestRobot.x, closestRobot.y)
                 else:
                     self._move(deltaTime, closestRobot.x, closestRobot.y)
-            else:
-                self._move(deltaTime, closestRobot.x, closestRobot.y)
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
