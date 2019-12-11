@@ -19,7 +19,7 @@ def main():
     # Load data arrays
     bitMapArray = np.loadtxt(bitMapFile)
 #    initialPositions = np.loadtxt(initialPositionsFile)
-    initialPositions = generateBotCoords(20, 35)
+    initialPositions = generateBotCoords(100, 35)
     # Init pygame
     pygame.init()
     fpsClock = pygame.time.Clock()
@@ -64,6 +64,7 @@ def main():
 
         # Wait until next frame
         fpsClock.tick(fps)
+        #print(f"FPS: {fpsClock.get_fps()}")
 
     pygame.display.quit()
     pygame.quit()

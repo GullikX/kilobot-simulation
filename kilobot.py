@@ -41,9 +41,9 @@ class Kilobot:
                 continue
             xDiff = self.x - bot.x
             yDiff = self.y - bot.y
-            dist = np.sqrt(xDiff**2 + yDiff**2)
+            distSquared = xDiff**2 + yDiff**2
 
-            if dist <= gradientCommunicationRange:
+            if distSquared <= gradientCommunicationRange**2:
                 neighbors.append(bot)
         return neighbors
 
@@ -75,7 +75,7 @@ class Kilobot:
                 self.state = State.MOVING
 
         elif self.state == State.MOVING:
-            closestRobot = self._findClosestRobot(deltaTime, kilobots)
+            closestRobot = self._findClosestRobot(deltaTime, neighbors)
             if self._isInsideShape():
                 if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
                     self.state = State.JOINED_SHAPE
@@ -113,16 +113,14 @@ class Kilobot:
             return True
 
     def _findClosestRobot(self, deltaTime, kilobots):
-        rmax = 100
+        rmax = np.inf
         closestBot = None
-        nearestX = 1
-        nearestY = 1
 
         for bot in kilobots:
             if bot is not self:
-                r = np.sqrt( (self.x - bot.x)**2 + (self.y - bot.y)**2 )
-                if r < rmax:
-                    rmax = r
+                rSquared = (self.x - bot.x)**2 + (self.y - bot.y)**2
+                if rSquared < rmax:
+                    rmax = rSquared
                     closestBot = bot
         return closestBot
 
