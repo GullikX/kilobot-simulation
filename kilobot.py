@@ -35,6 +35,14 @@ class Kilobot:
         self.state = State.WAIT_TO_MOVE
         self.neighbors = []
 
+    def _getMovePriority(self):
+        if self.state != State.MOVING:
+            return -np.inf
+        angle = np.arctan2(self.y, self.x)
+        if angle < 0:
+            angle += 2*np.pi
+        return -angle
+
     def _getNeighbors(self, kilobots):
         neighbors = []
         for bot in kilobots:
@@ -68,14 +76,19 @@ class Kilobot:
                 self.state = State.MOVING
 
         elif self.state == State.MOVING:
-            closestRobot = self._findClosestRobot(deltaTime, self.neighbors)
-            if self._isInsideShape():
-                if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
-                    self.state = State.JOINED_SHAPE
+            neighborMovePriorities = [None] * len(self.neighbors)
+            for i in range(len(self.neighbors)):
+                neighborMovePriorities[i] = self.neighbors[i]._getMovePriority()
+            if len(self.neighbors) == 0 or self._getMovePriority() > max(neighborMovePriorities):
+                closestRobot = self._findClosestRobot(deltaTime, self.neighbors)
+                if self._isInsideShape():
+                    if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
+                        self.state = State.JOINED_SHAPE
+                        self.startTime = np.inf
+                    else:
+                        self._move(deltaTime, closestRobot.x, closestRobot.y)
                 else:
                     self._move(deltaTime, closestRobot.x, closestRobot.y)
-            else:
-                self._move(deltaTime, closestRobot.x, closestRobot.y)
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
@@ -155,7 +168,6 @@ class Kilobot:
         elif self.state == State.JOINED_SHAPE:
             textColor = (0, 255, 0)
         self.renderer.drawText(textColor, str(self.gradientVal), position)
-
 
 
 
