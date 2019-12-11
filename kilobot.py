@@ -33,7 +33,6 @@ class Kilobot:
         self.bitMapScalingFactor = bitMapScalingFactor
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
-        self.id = random.random()  # very idealistic
         self.neighbors = []
 
     def _getNeighbors(self, kilobots):
@@ -65,16 +64,7 @@ class Kilobot:
         self.gradientVal = minNeighborGradient + 1
 
         if self.state == State.WAIT_TO_MOVE:
-            neighborIdsWithSameGradient = []
-            for i in range(len(self.neighbors)):
-                if self.neighbors[i].gradientVal == self.gradientVal:
-                    neighborIdsWithSameGradient.append(self.neighbors[i].id)
-            if len(neighborIdsWithSameGradient) == 0:
-                maxNeighborIdWithSameGradient = np.inf
-            else:
-                maxNeighborIdWithSameGradient = max(neighborIdsWithSameGradient)
-
-            if self.gradientVal > maxNeighborGradient or (self.gradientVal == maxNeighborGradient and self.id > maxNeighborIdWithSameGradient):
+            if (self.gradientVal >= maxNeighborGradient) and len(self.neighbors) < 4:
                 self.state = State.MOVING
 
         elif self.state == State.MOVING:
