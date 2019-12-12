@@ -28,7 +28,7 @@ class Kilobot:
         self.x = startPosition[0,0]
         self.y = startPosition[0,1]
         self.direction = startDirection
-        self.bitMapArray = np.flip(bitMapArray, 0)
+        self.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
         self.bitMapScalingFactor = bitMapScalingFactor
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
