@@ -84,4 +84,3 @@ class Renderer:
 
     def updateDisplay(self):
         pygame.display.update()
-        return self.screen

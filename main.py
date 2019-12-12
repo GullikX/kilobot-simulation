@@ -61,7 +61,7 @@ def main():
         renderer.drawBitMap()
         for kilobot in kilobots:
             kilobot.draw()
-        surf = renderer.updateDisplay()
+        renderer.updateDisplay()
 
         # Wait until next frame
         fpsClock.tick(fps)
