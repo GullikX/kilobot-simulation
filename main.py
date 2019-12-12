@@ -4,20 +4,20 @@ import numpy as np
 import random
 import sys
 
-from kilobot import Kilobot, KilobotOrigin, generateBotCoords
+from kilobot import Kilobot, KilobotOrigin
 from renderer import Renderer
-
+from helpers import generateBotCoords, calcScalingFactor
 windowSize = (1280, 720)
 fps = 60
 deltaTime = 1
 nKilobotsOrigin = 4
-bitMapFile = "data/bitmap.csv"
-bitMapScalingFactor = 116
+nrOfRobots = 100
 initialPositionsFile = "data/initPos.csv"
-
+bitMapFile = "data/bitmap.csv"
 def main():
     # Load data arrays
     bitMapArray = np.loadtxt(bitMapFile)
+    bitMapScalingFactor = calcScalingFactor(nrOfRobots, bitMapArray,31)
 #    initialPositions = np.loadtxt(initialPositionsFile)
     initialPositions = generateBotCoords(102, 35)
     # Init pygame
