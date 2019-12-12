@@ -180,8 +180,8 @@ class KilobotOrigin(Kilobot):
 
 
 def generateBotCoords(nrOfBots,preferedDistance):
-    fourInitial = [[1/2,0],[0, -np.sqrt(3)/2],
-                    [-1/2,0], [0, np.sqrt(3)/2]]
+    fourInitial = [[-1/2,0],[0, -np.sqrt(3)/2],
+                    [1/2,0], [0, np.sqrt(3)/2]]
     p = np.array([1/2, -np.sqrt(3)])
     k = int(nrOfBots**(2/3))
     for i in range(4,nrOfBots):

@@ -12,14 +12,14 @@ fps = 60
 deltaTime = 1
 nKilobotsOrigin = 4
 bitMapFile = "data/bitmap.csv"
-bitMapScalingFactor = 100
+bitMapScalingFactor = 116
 initialPositionsFile = "data/initPos.csv"
 
 def main():
     # Load data arrays
     bitMapArray = np.loadtxt(bitMapFile)
 #    initialPositions = np.loadtxt(initialPositionsFile)
-    initialPositions = generateBotCoords(100, 35)
+    initialPositions = generateBotCoords(102, 35)
     # Init pygame
     pygame.init()
     fpsClock = pygame.time.Clock()
