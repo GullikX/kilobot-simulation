@@ -1,8 +1,10 @@
 from enum import Enum
 import numpy as np
 
-colorBody = (192, 192, 192)
-colorDirectionLine = (25, 118, 210)
+colorBodyWaiting = (229, 57, 53)
+colorBodyMoving = (66, 175, 80)
+colorBodyJoinedShape = (25, 118, 210)
+colorDirectionLine = (192, 192, 192)
 
 size = 15
 velocity = 1
@@ -157,16 +159,17 @@ class Kilobot:
             int(self.x + np.cos(self.direction) * size),
             int(self.y + np.sin(self.direction) * size),
         )
-        self.renderer.drawCircle(colorBody, position, size)
-        self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/5)
 
         if self.state == State.WAIT_TO_MOVE:
-            textColor = (255, 0, 0)
+            colorBody = colorBodyWaiting
         elif self.state == State.MOVING:
-            textColor = (255, 255, 0)
+            colorBody = colorBodyMoving
         elif self.state == State.JOINED_SHAPE:
-            textColor = (0, 255, 0)
-        self.renderer.drawText(textColor, str(self.gradientVal), position)
+            colorBody = colorBodyJoinedShape
+
+        self.renderer.drawCircle(colorBody, position, size)
+        self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
+        #self.renderer.drawText(textColor, str(self.gradientVal), position)
 
 
 
