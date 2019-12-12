@@ -12,9 +12,9 @@ turnSpeed = np.pi / 30
 communicationRange = 100
 neighborUpdateInterval = 5
 
-preferedDistance = 35 #Bugged for <= 2 * size
+preferedDistance = 31 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
-gradientCommunicationRange = preferedDistance + 15
+gradientCommunicationRange = preferedDistance + 5
 
 
 class State(Enum):
@@ -24,18 +24,20 @@ class State(Enum):
 
 
 class Kilobot:
+    bitMapArray = []
+    bitMapScalingFactor = 0
+    botsPartOfShape = []
     def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
         self.renderer = renderer
 
         self.x = startPosition[0,0]
         self.y = startPosition[0,1]
         self.direction = startDirection
-        self.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
-        self.bitMapScalingFactor = bitMapScalingFactor
+        Kilobot.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
+        Kilobot.bitMapScalingFactor = bitMapScalingFactor
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
         self.neighbors = []
-
     def _getMovePriority(self):
         if self.state != State.MOVING:
             return -np.inf
@@ -85,6 +87,7 @@ class Kilobot:
                 if self._isInsideShape():
                     if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
                         self.state = State.JOINED_SHAPE
+                        Kilobot.botsPartOfShape.append(self)
                         self.startTime = np.inf
                     else:
                         self._move(deltaTime, closestRobot.x, closestRobot.y)
@@ -95,12 +98,12 @@ class Kilobot:
             pass  # do nothing
 
     def _isInsideShape(self):
-        xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
-        yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
+        xDim = Kilobot.bitMapArray.shape[0]*Kilobot.bitMapScalingFactor
+        yDim = Kilobot.bitMapArray.shape[1]*Kilobot.bitMapScalingFactor
         if self.x >= 0 and self.y >= 0 and self.x < xDim and self.y  < yDim:
-            x = int(self.x/self.bitMapScalingFactor)
-            y = int(self.y/self.bitMapScalingFactor)
-            bitMapVal = self.bitMapArray[x,y]
+            x = int(self.x/Kilobot.bitMapScalingFactor)
+            y = int(self.y/Kilobot.bitMapScalingFactor)
+            bitMapVal = Kilobot.bitMapArray[x,y]
             return bool(bitMapVal)
         return False
 
@@ -108,12 +111,12 @@ class Kilobot:
         xfuture = self.x + velocity*dt*np.cos(self.direction)
         yfuture = self.y + velocity*dt*np.sin(self.direction)
 
-        xDim = self.bitMapArray.shape[0]*self.bitMapScalingFactor
-        yDim = self.bitMapArray.shape[1]*self.bitMapScalingFactor
+        xDim = Kilobot.bitMapArray.shape[0]*Kilobot.bitMapScalingFactor
+        yDim = Kilobot.bitMapArray.shape[1]*Kilobot.bitMapScalingFactor
         if xfuture >= 0 and yfuture >= 0 and xfuture < xDim and yfuture < yDim:
-            yfuture2 = int(yfuture/self.bitMapScalingFactor)
-            xfuture2 = int(xfuture/self.bitMapScalingFactor)
-            nextVal = self.bitMapArray[xfuture2,yfuture2]
+            yfuture2 = int(yfuture/Kilobot.bitMapScalingFactor)
+            xfuture2 = int(xfuture/Kilobot.bitMapScalingFactor)
+            nextVal = Kilobot.bitMapArray[xfuture2,yfuture2]
             if nextVal == 0:
                 return True #we are on the edge stop fucking MOVING
         elif xfuture < 0 or yfuture < 0 or xfuture >= xDim or yfuture >= yDim:
@@ -177,6 +180,6 @@ class KilobotOrigin(Kilobot):
     def __init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
         Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal)
         self.state = State.JOINED_SHAPE
-
+        Kilobot.botsPartOfShape.append(self)
     def timestep(self, iTimestep, deltaTime, kilobots):
         pass
