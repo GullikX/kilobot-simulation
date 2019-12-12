@@ -14,6 +14,7 @@ neighborUpdateInterval = 5
 
 preferedDistance = 35 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
+maxAngle = np.pi * 10
 gradientCommunicationRange = preferedDistance + 15
 
 
@@ -30,6 +31,7 @@ class Kilobot:
         self.x = startPosition[0,0]
         self.y = startPosition[0,1]
         self.direction = startDirection
+        self.startDirection = startDirection
         self.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
         self.bitMapScalingFactor = bitMapScalingFactor
         self.gradientVal = gradientVal
@@ -66,14 +68,21 @@ class Kilobot:
             neighborGradients[i] = self.neighbors[i].gradientVal
         if len(neighborGradients) == 0:
             minNeighborGradient = np.inf
-            maxNeighborGradient = np.inf
         else:
             minNeighborGradient = min(neighborGradients)
-            maxNeighborGradient = max(neighborGradients)
         self.gradientVal = minNeighborGradient + 1
 
         if self.state == State.WAIT_TO_MOVE:
-            if (self.gradientVal >= maxNeighborGradient) and len(self.neighbors) < 4:
+            nMovingNeighbors = 0
+            for neighbor in self.neighbors:
+                nMovingNeighbors += (neighbor.state == State.MOVING)
+
+            maxWaitingNeighborGradientVal = 0
+            for neighbor in self.neighbors:
+                if neighbor.state == State.WAIT_TO_MOVE and neighbor.gradientVal > maxWaitingNeighborGradientVal:
+                    maxWaitingNeighborGradientVal = neighbor.gradientVal
+
+            if self.gradientVal < np.inf and self.gradientVal >= maxWaitingNeighborGradientVal and nMovingNeighbors == 0:
                 self.state = State.MOVING
 
         elif self.state == State.MOVING:
@@ -87,9 +96,14 @@ class Kilobot:
                         self.state = State.JOINED_SHAPE
                         self.startTime = np.inf
                     else:
-                        self._move(deltaTime, closestRobot.x, closestRobot.y)
+                        self._move(deltaTime, closestRobot)
                 else:
-                    self._move(deltaTime, closestRobot.x, closestRobot.y)
+                    self._move(deltaTime, closestRobot)
+
+            turnedAngle = self.direction - self.startDirection
+            if turnedAngle > maxAngle or turnedAngle < -maxAngle:
+                self.startDirection = self.direction
+                self.state = State.WAIT_TO_MOVE
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
@@ -131,9 +145,14 @@ class Kilobot:
                     closestBot = bot
         return closestBot
 
-    def _move(self, deltaTime, nearestX, nearestY):
-        dx = self.x - nearestX
-        dy = self.y - nearestY
+    def _move(self, deltaTime, nearestRobot):
+        if nearestRobot is None:
+            self.x += velocity * deltaTime * np.cos(self.direction)
+            self.y += velocity * deltaTime * np.sin(self.direction)
+            return
+
+        dx = self.x - nearestRobot.x
+        dy = self.y - nearestRobot.y
         rVector = np.array([dx, dy, 0])
         w = np.cross(rVector, np.array([0, 0, 1]))
         tempVector = w / np.sqrt( np.dot(w, w) ) +  \
