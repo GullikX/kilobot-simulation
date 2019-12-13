@@ -33,8 +33,8 @@ class Kilobot:
 
         self.x = startPosition[0,0]
         self.y = startPosition[0,1]
-        self.xLocalized = 0
-        self.yLocalized = 0
+        self.xActual = self.x
+        self.yActual = self.y
         self.direction = startDirection
         Kilobot.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
         Kilobot.bitMapScalingFactor = bitMapScalingFactor
@@ -68,7 +68,7 @@ class Kilobot:
         return [neighbors, comNeighbours]
 
     def timestep(self, iTimestep, deltaTime, kilobots):
-        self.localization()
+        self.addBrus()
         # Calculate gradient value
         if iTimestep % neighborUpdateInterval == 0:  # Increase performance by not updating each frame
             [self.neighbors,self.comNeighbours] = self._getNeighbors(kilobots)
@@ -144,8 +144,8 @@ class Kilobot:
 
     def _move(self, deltaTime, nearestRobot):
         if nearestRobot is None:
-            self.x += velocity * deltaTime * np.cos(self.direction)
-            self.y += velocity * deltaTime * np.sin(self.direction)
+            self.xActual += velocity * deltaTime * np.cos(self.direction)
+            self.yActual += velocity * deltaTime * np.cos(self.direction)
             return
 
         dx = self.x - nearestRobot.x
@@ -165,9 +165,8 @@ class Kilobot:
             tempVector = np.dot(w,preferedDirectionVector)
             self.direction -= turnSpeed * deltaTime * tempVector / np.sqrt( np.dot(tempVector, tempVector) )
         else:
-            self.x += velocity * deltaTime * np.cos(self.direction)
-            self.y += velocity * deltaTime * np.sin(self.direction)
-
+            self.xActual += velocity * deltaTime * np.cos(self.direction)
+            self.yActual += velocity * deltaTime * np.cos(self.direction)
 
     def localization(self):
         nList = []
@@ -190,12 +189,18 @@ class Kilobot:
 
             self.localized = True
 
+    def addBrus(self):
+        noise = np.random.uniform(-0.0001, 0.0001)
+        self.x = self.xActual + noise
+        self.y = self.yActual + noise
+
     def draw(self):
-        position = (int(self.x), int(self.y))
+        position = (int(self.xActual), int(self.yActual))
         directionLineTarget = (
-            int(self.x + np.cos(self.direction) * size),
-            int(self.y + np.sin(self.direction) * size),
+            int(self.xActual + np.cos(self.direction) * size),
+            int(self.yActual + np.sin(self.direction) * size),
         )
+
 
         if self.state == State.WAIT_TO_MOVE:
             colorBody = colorBodyWaiting
@@ -206,7 +211,7 @@ class Kilobot:
 
         self.renderer.drawCircle(colorBody, position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
-        self.renderer.drawText((255, 255, 255), f"({self.xLocalized:.1f}, {self.yLocalized:.1f})", position)
+        #self.renderer.drawText((255, 255, 255), f"({self.xLocalized:.1f}, {self.yLocalized:.1f})", position)
 
 
 
