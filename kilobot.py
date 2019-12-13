@@ -15,8 +15,8 @@ neighborUpdateInterval = 5
 
 preferedDistance = 31 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
-#gradientCommunicationRange = preferedDistance + 5
-gradientCommunicationRange = 100
+gradientCommunicationRange = preferedDistance + 5
+
 
 
 class State(Enum):
@@ -42,6 +42,7 @@ class Kilobot:
         self.state = State.WAIT_TO_MOVE
         self.neighbors = []
         self.localized = False
+        self.comNeighbours = []
     def _getMovePriority(self):
         if self.state != State.MOVING:
             return -np.inf
@@ -52,6 +53,7 @@ class Kilobot:
 
     def _getNeighbors(self, kilobots):
         neighbors = []
+        comNeighbours = []
         for bot in kilobots:
             if bot is self:
                 continue
@@ -61,13 +63,15 @@ class Kilobot:
 
             if distSquared <= gradientCommunicationRange**2:
                 neighbors.append(bot)
-        return neighbors
+            if distSquared <= communicationRange**2:
+                comNeighbours.append(bot)
+        return [neighbors, comNeighbours]
 
     def timestep(self, iTimestep, deltaTime, kilobots):
         self.localization()
         # Calculate gradient value
         if iTimestep % neighborUpdateInterval == 0:  # Increase performance by not updating each frame
-            self.neighbors = self._getNeighbors(kilobots)
+            [self.neighbors,self.comNeighbours] = self._getNeighbors(kilobots)
         neighborGradients = [None] * len(self.neighbors)
         for i in range(len(self.neighbors)):
             neighborGradients[i] = self.neighbors[i].gradientVal
@@ -169,21 +173,21 @@ class Kilobot:
         nList = []
 
         #Meassured distance
-        noise = 0#np.random.uniform(-1,1)
-        for bot in self.neighbors:
+        noise = np.random.uniform(-1,1)
+        for bot in self.comNeighbours:
             if bot.localized and (bot.state == State.JOINED_SHAPE or bot.state == State.WAIT_TO_MOVE):
                 nList.append(bot)
 
         if len(nList) >= 3:
             for bot in nList:
-                posBot = np.array([bot.xLocalized, bot.yLocalized])
+                posBot = np.array([bot.x, bot.y])
                 calcDist = np.sqrt((bot.xLocalized - self.xLocalized)**2 + (bot.yLocalized - self.yLocalized)**2)
                 dirVector = np.array([(self.x - bot.x), (self.y-bot.y)])/calcDist
                 measuredDistance = np.sqrt((self.x - bot.x)**2 + (self.y - bot.y)**2) + noise
                 newPos = posBot + measuredDistance*dirVector
                 self.xLocalized -= (self.xLocalized - newPos[0]) / 4
                 self.yLocalized -= (self.yLocalized - newPos[1]) / 4
-                print(f"{calcDist}")
+
             self.localized = True
 
     def draw(self):
