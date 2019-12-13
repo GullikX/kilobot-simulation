@@ -38,6 +38,7 @@ class Kilobot:
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
         self.neighbors = []
+
     def _getMovePriority(self):
         if self.state != State.MOVING:
             return -np.inf
@@ -90,9 +91,9 @@ class Kilobot:
                         Kilobot.botsPartOfShape.append(self)
                         self.startTime = np.inf
                     else:
-                        self._move(deltaTime, closestRobot.x, closestRobot.y)
+                        self._move(deltaTime, closestRobot)
                 else:
-                    self._move(deltaTime, closestRobot.x, closestRobot.y)
+                    self._move(deltaTime, closestRobot)
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
@@ -134,9 +135,14 @@ class Kilobot:
                     closestBot = bot
         return closestBot
 
-    def _move(self, deltaTime, nearestX, nearestY):
-        dx = self.x - nearestX
-        dy = self.y - nearestY
+    def _move(self, deltaTime, nearestRobot):
+        if nearestRobot is None:
+            self.x += velocity * deltaTime * np.cos(self.direction)
+            self.y += velocity * deltaTime * np.sin(self.direction)
+            return
+
+        dx = self.x - nearestRobot.x
+        dy = self.y - nearestRobot.y
         rVector = np.array([dx, dy, 0])
         w = np.cross(rVector, np.array([0, 0, 1]))
         tempVector = w / np.sqrt( np.dot(w, w) ) +  \
