@@ -1,3 +1,4 @@
+from __future__ import division
 from enum import Enum
 import numpy as np
 
@@ -26,7 +27,6 @@ class State(Enum):
 class Kilobot:
     bitMapArray = []
     bitMapScalingFactor = 0
-    botsPartOfShape = []
     def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
         self.renderer = renderer
 
@@ -38,7 +38,7 @@ class Kilobot:
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
         self.neighbors = []
-
+        self.localized = False
     def _getMovePriority(self):
         if self.state != State.MOVING:
             return -np.inf
@@ -61,6 +61,7 @@ class Kilobot:
         return neighbors
 
     def timestep(self, iTimestep, deltaTime, kilobots):
+        self.localization()
         # Calculate gradient value
         if iTimestep % neighborUpdateInterval == 0:  # Increase performance by not updating each frame
             self.neighbors = self._getNeighbors(kilobots)
@@ -88,7 +89,6 @@ class Kilobot:
                 if self._isInsideShape():
                     if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
                         self.state = State.JOINED_SHAPE
-                        Kilobot.botsPartOfShape.append(self)
                         self.startTime = np.inf
                     else:
                         self._move(deltaTime, closestRobot)
@@ -162,6 +162,27 @@ class Kilobot:
             self.y += velocity * deltaTime * np.sin(self.direction)
 
 
+    def localization(self):
+        nList = []
+
+        #Meassured distance
+        x = self.x + np.random.uniform(-1,1)
+        y = self.y + np.random.uniform(-1,1)
+        if not isinstance(self, Kilobot):
+            self.x = 0
+            self.y = 0
+        for bot in self.neighbors:
+            if bot.localized and bot.state == State.JOINED_SHAPE:
+                nList.append(bot)
+
+        if len(nList) >= 3:
+            for bot in nList:
+                posBot = np.array([bot.x, bot.y])
+                calcDist = np.sqrt([(bot.x - self.x)**2, (bot.y - self.y)**2])
+                dirVector = np.sqrt([(self.x - bot.x), (self.y-bot.y)])/calcDist
+                newPos = posBot + np.array([x, y])*dirVector
+                [self.x, self.y] = posBot - (posBot -newPos)/4
+            self.localized = True
     def draw(self):
         position = (int(self.x), int(self.y))
         directionLineTarget = (
@@ -186,6 +207,6 @@ class KilobotOrigin(Kilobot):
     def __init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
         Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal)
         self.state = State.JOINED_SHAPE
-        Kilobot.botsPartOfShape.append(self)
+        self.localized = True
     def timestep(self, iTimestep, deltaTime, kilobots):
         pass
