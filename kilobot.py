@@ -15,7 +15,8 @@ neighborUpdateInterval = 5
 
 preferedDistance = 31 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
-gradientCommunicationRange = preferedDistance + 5
+#gradientCommunicationRange = preferedDistance + 5
+gradientCommunicationRange = 100
 
 
 class State(Enum):
@@ -32,6 +33,8 @@ class Kilobot:
 
         self.x = startPosition[0,0]
         self.y = startPosition[0,1]
+        self.xLocalized = 0
+        self.yLocalized = 0
         self.direction = startDirection
         Kilobot.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
         Kilobot.bitMapScalingFactor = bitMapScalingFactor
@@ -166,23 +169,23 @@ class Kilobot:
         nList = []
 
         #Meassured distance
-        x = self.x + np.random.uniform(-1,1)
-        y = self.y + np.random.uniform(-1,1)
-        if not isinstance(self, Kilobot):
-            self.x = 0
-            self.y = 0
+        noise = 0#np.random.uniform(-1,1)
         for bot in self.neighbors:
-            if bot.localized and bot.state == State.JOINED_SHAPE:
+            if bot.localized and (bot.state == State.JOINED_SHAPE or bot.state == State.WAIT_TO_MOVE):
                 nList.append(bot)
 
         if len(nList) >= 3:
             for bot in nList:
-                posBot = np.array([bot.x, bot.y])
-                calcDist = np.sqrt([(bot.x - self.x)**2, (bot.y - self.y)**2])
-                dirVector = np.sqrt([(self.x - bot.x), (self.y-bot.y)])/calcDist
-                newPos = posBot + np.array([x, y])*dirVector
-                [self.x, self.y] = posBot - (posBot -newPos)/4
+                posBot = np.array([bot.xLocalized, bot.yLocalized])
+                calcDist = np.sqrt((bot.xLocalized - self.xLocalized)**2 + (bot.yLocalized - self.yLocalized)**2)
+                dirVector = np.array([(self.x - bot.x), (self.y-bot.y)])/calcDist
+                measuredDistance = np.sqrt((self.x - bot.x)**2 + (self.y - bot.y)**2) + noise
+                newPos = posBot + measuredDistance*dirVector
+                self.xLocalized -= (self.xLocalized - newPos[0]) / 4
+                self.yLocalized -= (self.yLocalized - newPos[1]) / 4
+                print(f"{calcDist}")
             self.localized = True
+
     def draw(self):
         position = (int(self.x), int(self.y))
         directionLineTarget = (
@@ -199,7 +202,7 @@ class Kilobot:
 
         self.renderer.drawCircle(colorBody, position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
-        #self.renderer.drawText(textColor, str(self.gradientVal), position)
+        self.renderer.drawText((255, 255, 255), f"({self.xLocalized:.1f}, {self.yLocalized:.1f})", position)
 
 
 
@@ -208,5 +211,8 @@ class KilobotOrigin(Kilobot):
         Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal)
         self.state = State.JOINED_SHAPE
         self.localized = True
+        self.xLocalized = self.x
+        self.yLocalized = self.y
+
     def timestep(self, iTimestep, deltaTime, kilobots):
         pass
