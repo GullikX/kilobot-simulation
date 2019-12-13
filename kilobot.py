@@ -145,7 +145,7 @@ class Kilobot:
     def _move(self, deltaTime, nearestRobot):
         if nearestRobot is None:
             self.xActual += velocity * deltaTime * np.cos(self.direction)
-            self.yActual += velocity * deltaTime * np.cos(self.direction)
+            self.yActual += velocity * deltaTime * np.sin(self.direction)
             return
 
         dx = self.x - nearestRobot.x
@@ -166,7 +166,7 @@ class Kilobot:
             self.direction -= turnSpeed * deltaTime * tempVector / np.sqrt( np.dot(tempVector, tempVector) )
         else:
             self.xActual += velocity * deltaTime * np.cos(self.direction)
-            self.yActual += velocity * deltaTime * np.cos(self.direction)
+            self.yActual += velocity * deltaTime * np.sin(self.direction)
 
     def localization(self):
         nList = []
