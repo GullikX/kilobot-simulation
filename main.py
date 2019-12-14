@@ -19,7 +19,7 @@ def main():
     bitMapArray = np.loadtxt(bitMapFile)
     bitMapScalingFactor = calcScalingFactor(nrOfRobots, bitMapArray,31)
 #    initialPositions = np.loadtxt(initialPositionsFile)
-    initialPositions = generateBotCoords(102, 35)
+    initialPositions = generateBotCoords(nrOfRobots, 35)
     # Init pygame
     pygame.init()
     fpsClock = pygame.time.Clock()
