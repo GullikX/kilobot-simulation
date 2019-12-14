@@ -15,10 +15,10 @@ turnSpeed = np.pi / 30
 communicationRange = 100
 neighborUpdateInterval = 5
 
-preferedDistance = 31 #Bugged for <= 2 * size
+preferedDistance = 32 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
-gradientCommunicationRange = preferedDistance + 5
-noiseRange = 1
+gradientCommunicationRange = preferedDistance + 10
+noiseRange = 0.1
 
 
 class State(Enum):
@@ -29,16 +29,15 @@ class State(Enum):
 
 class Kilobot:
     bitMapArray = []
-    bitMapScalingFactor = 0
-    def __init__ (self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
+    scalingFactor = 0
+    def __init__ (self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
         self.renderer = renderer
-        self.x = startPosition[0,0]
-        self.y = startPosition[0,1]
-        self.xActual = self.x
-        self.yActual = self.y
-        self.direction = startDirection
         Kilobot.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
-        Kilobot.bitMapScalingFactor = bitMapScalingFactor
+        Kilobot.scalingFactor = scalingFactor
+
+        self.pos = np.asarray(startPosition).reshape(-1)
+        self.pActual = self.pos
+        self.direction = startDirection
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
         self.neighbors = []
@@ -47,7 +46,7 @@ class Kilobot:
     def _getMovePriority(self):
         if self.state != State.MOVING:
             return -np.inf
-        angle = np.arctan2(self.y, self.x)
+        angle = np.arctan2(self.pos[1], self.pos[0])
         if angle < 0:
             angle += 2*np.pi
         return -angle
@@ -58,11 +57,8 @@ class Kilobot:
         for bot in kilobots:
             if bot is self:
                 continue
-            xDiff = self.x - bot.x
-            yDiff = self.y - bot.y
-            distSquared = xDiff**2 + yDiff**2
-
-            if distSquared <= gradientCommunicationRange**2:
+            diff = np.sum((self.pos - bot.pos)**2)
+            if diff <= gradientCommunicationRange**2:
                 neighbors.append(bot)
         return neighbors
 
@@ -81,43 +77,40 @@ class Kilobot:
             for i in range(len(self.neighbors)):
                 neighborMovePriorities[i] = self.neighbors[i]._getMovePriority()
             if len(self.neighbors) == 0 or self._getMovePriority() > max(neighborMovePriorities):
+                self.addBrus()
                 closestRobot = self._findClosestRobot(deltaTime, self.neighbors)
-                self.addBrus(closestRobot)
-
                 if self._isInsideShape():
                     if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
                         self.state = State.JOINED_SHAPE
                         self.startTime = np.inf
                     else:
-                        self._move(deltaTime, closestRobot)
+                        self._move(deltaTime,closestRobot)
                 else:
-                    self._move(deltaTime, closestRobot)
+                    self._move(deltaTime,closestRobot)
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
 
     def _isInsideShape(self):
-        xDim = Kilobot.bitMapArray.shape[0]*Kilobot.bitMapScalingFactor
-        yDim = Kilobot.bitMapArray.shape[1]*Kilobot.bitMapScalingFactor
-        if self.x >= 0 and self.y >= 0 and self.x < xDim and self.y  < yDim:
-            x = int(self.x/Kilobot.bitMapScalingFactor)
-            y = int(self.y/Kilobot.bitMapScalingFactor)
-            bitMapVal = Kilobot.bitMapArray[x,y]
+        dim = np.multiply(Kilobot.bitMapArray.shape,Kilobot.scalingFactor)
+        if np.all(self.pos >= 0) and np.all(self.pos < dim):
+            p = self.pos/Kilobot.scalingFactor
+            bitMapVal = Kilobot.bitMapArray[p[0].astype(int), p[1].astype(int)]
             return bool(bitMapVal)
         return False
 
     def _isOnEdge(self, dt):
-        xfuture = self.x + velocity*dt*np.cos(self.direction)
-        yfuture = self.y + velocity*dt*np.sin(self.direction)
+        xfuture = self.pos[0] + velocity*dt*np.cos(self.direction)
+        yfuture = self.pos[1] + velocity*dt*np.sin(self.direction)
+        xDim = Kilobot.bitMapArray.shape[0]*Kilobot.scalingFactor
+        yDim = Kilobot.bitMapArray.shape[1]*Kilobot.scalingFactor
 
-        xDim = Kilobot.bitMapArray.shape[0]*Kilobot.bitMapScalingFactor
-        yDim = Kilobot.bitMapArray.shape[1]*Kilobot.bitMapScalingFactor
         if xfuture >= 0 and yfuture >= 0 and xfuture < xDim and yfuture < yDim:
-            yfuture2 = int(yfuture/Kilobot.bitMapScalingFactor)
-            xfuture2 = int(xfuture/Kilobot.bitMapScalingFactor)
+            yfuture2 = int(yfuture/Kilobot.scalingFactor)
+            xfuture2 = int(xfuture/Kilobot.scalingFactor)
             nextVal = Kilobot.bitMapArray[xfuture2,yfuture2]
             if nextVal == 0:
-                return True #we are on the edge stop fucking MOVING
+               return True #we are on the edge stop fucking MOVING
         elif xfuture < 0 or yfuture < 0 or xfuture >= xDim or yfuture >= yDim:
             return True
 
@@ -126,7 +119,7 @@ class Kilobot:
         closestBot = None
         for bot in kilobots:
             if bot is not self:
-                rSquared = (self.x - bot.x)**2 + (self.y - bot.y)**2
+                rSquared = np.sum((self.pos - bot.pos)**2)
                 if rSquared < rmax:
                     rmax = rSquared
                     closestBot = bot
@@ -135,20 +128,21 @@ class Kilobot:
 
     def _move(self, deltaTime, nearestRobot):
         if nearestRobot is None:
-            self.xActual += velocity * deltaTime * np.cos(self.direction)
-            self.yActual += velocity * deltaTime * np.sin(self.direction)
+            dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
+            self.pActual += velocity * deltaTime * dirV
+            bot = self._findClosestRobot(deltaTime, self.neighbors)
+            self.collision(bot)
             return
 
-        dx = self.x - nearestRobot.x
-        dy = self.y - nearestRobot.y
-        rVector = np.array([dx, dy, 0])
+        diff = self.pos - nearestRobot.pos
+        rVector = np.append(diff, 0)
         w = np.cross(rVector, np.array([0, 0, 1]))
         tempVector = w / np.sqrt( np.dot(w, w) ) +  \
-                (preferedDistance - np.sqrt(dx**2 + dy**2) ) / \
+                (preferedDistance - np.sqrt(np.sum(diff**2))) / \
                 ( preferedDistance - 2 * size ) * rVector / np.sqrt(np.dot(rVector,rVector))
         preferedDirectionVector = tempVector / np.sqrt( np.dot(tempVector, tempVector) )
 
-        directionVector = np.array([np.cos(self.direction), np.sin(self.direction), 0])
+        directionVector = np.array([np.cos(self.direction),np.sin(self.direction), 0])
         choiceVector = np.dot(preferedDirectionVector, directionVector)
 
         if choiceVector < np.cos(maxAngleError):
@@ -156,25 +150,23 @@ class Kilobot:
             tempVector = np.dot(w,preferedDirectionVector)
             self.direction -= turnSpeed * deltaTime * tempVector / np.sqrt( np.dot(tempVector, tempVector) )
         else:
-            self.xActual += velocity * deltaTime * np.cos(self.direction)
-            self.yActual += velocity * deltaTime * np.sin(self.direction)
+            dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
+            self.pActual += velocity * deltaTime * dirV
+            bot = self._findClosestRobot(deltaTime, self.neighbors)
+            self.collision(bot)
 
-    def addBrus(self,closestBot):
-        g = self.gradientVal/10
+    def addBrus(self):
+        g = self.gradientVal*self.sensorError
         if self.gradientVal > 20:
-            g = 20/10
+            g = 20*self.sensorError
         g = self.sensorError*g
-
-        self.x = self.xActual + g
-        self.y = self.yActual + g
-        diff = abs(self.xActual - self.x)
-        #self.sensorError = np.random.uniform(-noiseRange,noiseRange)
+        self.pos = self.pActual + g
 
     def draw(self):
-        position = (int(self.xActual), int(self.yActual))
+        position = (int(self.pActual[0]), int(self.pActual[1]))
         directionLineTarget = (
-            int(self.xActual + np.cos(self.direction) * size),
-            int(self.yActual + np.sin(self.direction) * size),
+            int(self.pActual[0] + np.cos(self.direction) * size),
+            int(self.pActual[1] + np.sin(self.direction) * size),
         )
 
 
@@ -203,16 +195,17 @@ class Kilobot:
 
         return [neighborGradients, maxNeighborGradient]
 
-    def calcDist(self, bot):
-        if self is not bot and bot is not None:
-            return sqrt((self.x-bot.x)**2 + (self.y-bot.y)**2)
-        else:
-            return np.inf
+    def collision(self, bot):
+        if bot is not None:
+            normDist = np.sqrt(np.sum((self.pActual - bot.pActual)**2))
+            normV = (bot.pActual - self.pActual)/normDist
+            if normDist < 2*size:
+                self.pActual += normV*(size - normDist)*0.8
 
 
 class KilobotOrigin(Kilobot):
-    def __init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal):
-        Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, bitMapScalingFactor, gradientVal)
+    def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
+        Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal)
         self.state = State.JOINED_SHAPE
         self.sensorError = 0
 
