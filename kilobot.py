@@ -87,9 +87,9 @@ class Kilobot:
                         self.state = State.JOINED_SHAPE
                         self.startTime = np.inf
                     else:
-                        self._move(deltaTime,closestRobot)
+                        self._edgeFollow(deltaTime,closestRobot)
                 else:
-                    self._move(deltaTime,closestRobot)
+                    self._edgeFollow(deltaTime,closestRobot)
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
@@ -129,23 +129,19 @@ class Kilobot:
 
         return closestBot
 
-    def _move(self, deltaTime, nearestRobot):
+    def _edgeFollow(self, deltaTime, nearestRobot):
         if nearestRobot is None:
-            dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
-            self.pActual += velocity * deltaTime * dirV
-            bot = self._findClosestRobot(deltaTime, self.neighbors)
-            self.collision(bot)
+            self.move(deltaTime)
             return
 
-
-            diff = self.pos - nearestRobot.pos
-            rVector = np.append(diff, 0)
-            w = np.cross(rVector, np.array([0, 0, 1]))
-            wNorm = w/np.linalg.norm(w)
-            rVectorNorm = rVector/np.linalg.norm(rVector)
-            s =(preferedDistance-np.linalg.norm(diff))/(preferedDistance-2*size)
-            tempVector = wNorm + s*rVectorNorm
-            preferedDirectionVector = tempVector / np.lingalg.norm(tempVector)
+        diff = self.pos - nearestRobot.pos
+        rVector = np.append(diff, 0)
+        w = np.cross(rVector, np.array([0, 0, 1]))
+        wNorm = w/np.linalg.norm(w)
+        rVectorNorm = rVector/np.linalg.norm(rVector)
+        s =(preferedDistance-np.linalg.norm(diff))/(preferedDistance-2*size)
+        tempVector = wNorm + s*rVectorNorm
+        preferedDirectionVector = tempVector / np.linalg.norm(tempVector)
 
         directionVector = np.array([np.cos(self.direction),np.sin(self.direction), 0])
         choiceVector = np.dot(preferedDirectionVector, directionVector)
@@ -153,12 +149,15 @@ class Kilobot:
         if choiceVector < np.cos(maxAngleError):
             w = np.cross(directionVector, np.array([0, 0, 1]))
             tempVector = np.dot(w,preferedDirectionVector)
-            self.direction -= turnSpeed * deltaTime * tempVector / np.sqrt( np.dot(tempVector, tempVector) )
+            self.direction -= turnSpeed * deltaTime * tempVector/np.linalg.norm(tempVector)
         else:
-            dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
-            self.pActual += velocity * deltaTime * dirV
-            bot = self._findClosestRobot(deltaTime, self.neighbors)
-            self.collision(bot)
+            self.move(deltaTime)
+
+    def move(self, deltaTime):
+        dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
+        self.pActual += velocity * deltaTime * dirV
+        bot = self._findClosestRobot(deltaTime, self.neighbors)
+        self.collision(bot)
 
     def _localize(self):
         if len(self.neighbors) == 0:
