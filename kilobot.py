@@ -156,9 +156,6 @@ class Kilobot:
         self.collision(bot)
 
     def _localize(self):
-        if len(self.comNeighbors) == 0:
-            self.pos = np.array([np.nan, np.nan]).T
-            return
         posApproximations = []
         for neighbor in self.comNeighbors:
             if (neighbor.state == State.WAIT_TO_MOVE or neighbor.state == State.JOINED_SHAPE) and neighbor.gradientVal < self.gradientVal:
