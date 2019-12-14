@@ -51,8 +51,21 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    renderer.dragStart(event)
+                if event.button == 4:
+                    renderer.zoomIn()
+                elif event.button == 5:
+                    renderer.zoomOut()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    renderer.dragStop()
+            elif event.type == pygame.MOUSEMOTION:
+                renderer.drag(event)
 
         # Logic
+        random.shuffle(kilobots)
         for kilobot in kilobots:
             kilobot.timestep(iTimestep, deltaTime, kilobots)
 

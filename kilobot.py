@@ -187,8 +187,8 @@ class Kilobot:
 
         self.renderer.drawCircle(colorBody, position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
-        locError = self.pos - self.pActual
-        self.renderer.drawText((255, 255, 255), f"{locError[0]:.1f}", position)
+        #locError = self.pos - self.pActual
+        #self.renderer.drawText((255, 255, 255), f"{locError[0]:.1f}", position)
 
     def _getNeighborGradients(self):
         neighborGradients = [None] * len(self.gradNeighbors)
