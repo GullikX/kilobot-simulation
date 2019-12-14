@@ -92,16 +92,16 @@ class Kilobot:
             for i in range(len(self.comNeighbors)):
                 neighborMovePriorities[i] = self.comNeighbors[i]._getMovePriority()
             if len(self.comNeighbors) == 0 or self._getMovePriority() > max(neighborMovePriorities):
-                isInsideShape = self._isInsideShape()
                 closestRobot = self._findClosestRobot(deltaTime)
-                if isInsideShape and self.enteredShapeTimestep == -1:
+                self._edgeFollow(deltaTime,closestRobot)
+
+            isInsideShape = self._isInsideShape()
+            if isInsideShape and self.enteredShapeTimestep == -1:
                     self.enteredShapeTimestep = iTimestep
-                elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
-                        (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
-                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal)):
-                    self.state = State.JOINED_SHAPE
-                else:
-                    self._edgeFollow(deltaTime,closestRobot)
+            elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
+                     (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
+                    (isInsideShape and closestRobot.gradientVal >= self.gradientVal)):
+                self.state = State.JOINED_SHAPE
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
