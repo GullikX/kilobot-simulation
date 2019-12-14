@@ -19,6 +19,7 @@ preferedDistance = 32 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
 gradientCommunicationRange = preferedDistance + 10
 noiseStdDev = 1
+stoppingTimesteps = 25
 
 
 class State(Enum):
@@ -42,6 +43,7 @@ class Kilobot:
         self.state = State.WAIT_TO_MOVE
         self.neighbors = []
         self.sensorError = np.random.normal(0, noiseStdDev)
+        self.enteredShapeTimestep = -1
 
     def _getMovePriority(self):
         if self.state != State.MOVING:
@@ -75,19 +77,20 @@ class Kilobot:
                 self.state = State.MOVING
         elif self.state == State.MOVING:
             if np.isnan(self.pos).any():
-                self._move(deltaTime, None)
+                self._edgeFollow(deltaTime, None)
                 return
             neighborMovePriorities = [None] * len(self.neighbors)
             for i in range(len(self.neighbors)):
                 neighborMovePriorities[i] = self.neighbors[i]._getMovePriority()
             if len(self.neighbors) == 0 or self._getMovePriority() > max(neighborMovePriorities):
+                isInsideShape = self._isInsideShape()
                 closestRobot = self._findClosestRobot(deltaTime, self.neighbors)
-                if self._isInsideShape():
-                    if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
-                        self.state = State.JOINED_SHAPE
-                        self.startTime = np.inf
-                    else:
-                        self._edgeFollow(deltaTime,closestRobot)
+                if isInsideShape and self.enteredShapeTimestep == -1:
+                    self.enteredShapeTimestep = iTimestep
+                elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
+                        (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
+                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal)):
+                    self.state = State.JOINED_SHAPE
                 else:
                     self._edgeFollow(deltaTime,closestRobot)
 
@@ -101,21 +104,6 @@ class Kilobot:
             bitMapVal = Kilobot.bitMapArray[p[0].astype(int), p[1].astype(int)]
             return bool(bitMapVal)
         return False
-
-    def _isOnEdge(self, dt):
-        xfuture = self.pos[0] + velocity*dt*np.cos(self.direction)
-        yfuture = self.pos[1] + velocity*dt*np.sin(self.direction)
-        xDim = Kilobot.bitMapArray.shape[0]*Kilobot.scalingFactor
-        yDim = Kilobot.bitMapArray.shape[1]*Kilobot.scalingFactor
-
-        if xfuture >= 0 and yfuture >= 0 and xfuture < xDim and yfuture < yDim:
-            yfuture2 = int(yfuture/Kilobot.scalingFactor)
-            xfuture2 = int(xfuture/Kilobot.scalingFactor)
-            nextVal = Kilobot.bitMapArray[xfuture2,yfuture2]
-            if nextVal == 0:
-               return True #we are on the edge stop fucking MOVING
-        elif xfuture < 0 or yfuture < 0 or xfuture >= xDim or yfuture >= yDim:
-            return True
 
     def _findClosestRobot(self, deltaTime, kilobots):
         rmax = np.inf
