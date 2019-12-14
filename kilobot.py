@@ -137,13 +137,15 @@ class Kilobot:
             self.collision(bot)
             return
 
-        diff = self.pos - nearestRobot.pos
-        rVector = np.append(diff, 0)
-        w = np.cross(rVector, np.array([0, 0, 1]))
-        tempVector = w / np.sqrt( np.dot(w, w) ) +  \
-                (preferedDistance - np.sqrt(np.sum(diff**2))) / \
-                ( preferedDistance - 2 * size ) * rVector / np.sqrt(np.dot(rVector,rVector))
-        preferedDirectionVector = tempVector / np.sqrt( np.dot(tempVector, tempVector) )
+
+            diff = self.pos - nearestRobot.pos
+            rVector = np.append(diff, 0)
+            w = np.cross(rVector, np.array([0, 0, 1]))
+            wNorm = w/np.linalg.norm(w)
+            rVectorNorm = rVector/np.linalg.norm(rVector)
+            s =(preferedDistance-np.linalg.norm(diff))/(preferedDistance-2*size)
+            tempVector = wNorm + s*rVectorNorm
+            preferedDirectionVector = tempVector / np.lingalg.norm(tempVector)
 
         directionVector = np.array([np.cos(self.direction),np.sin(self.direction), 0])
         choiceVector = np.dot(preferedDirectionVector, directionVector)
