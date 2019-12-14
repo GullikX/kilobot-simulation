@@ -18,7 +18,7 @@ neighborUpdateInterval = 5
 preferedDistance = 32 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
 gradientCommunicationRange = preferedDistance + 10
-noiseRange = 0.1
+noiseStdDev = 1
 
 
 class State(Enum):
@@ -35,13 +35,13 @@ class Kilobot:
         Kilobot.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
         Kilobot.scalingFactor = scalingFactor
 
-        self.pos = np.asarray(startPosition).reshape(-1)
-        self.pActual = self.pos
+        self.pActual = np.asarray(startPosition).reshape(-1)
+        self.pos = np.array([np.nan, np.nan]).T
         self.direction = startDirection
         self.gradientVal = gradientVal
         self.state = State.WAIT_TO_MOVE
         self.neighbors = []
-        self.sensorError = np.random.uniform(-noiseRange, noiseRange)
+        self.sensorError = np.random.normal(0, noiseStdDev)
 
     def _getMovePriority(self):
         if self.state != State.MOVING:
@@ -57,12 +57,14 @@ class Kilobot:
         for bot in kilobots:
             if bot is self:
                 continue
-            diff = np.sum((self.pos - bot.pos)**2)
+            diff = np.sum((self.pActual - bot.pActual)**2)
             if diff <= gradientCommunicationRange**2:
                 neighbors.append(bot)
         return neighbors
 
     def timestep(self, iTimestep, deltaTime, kilobots):
+        self._localize()
+
         # Calculate gradient value
         if iTimestep % neighborUpdateInterval == 0:  # Increase performance by not updating each frame
             self.neighbors = self._getNeighbors(kilobots)
@@ -72,12 +74,13 @@ class Kilobot:
             if (self.gradientVal >= maxNeighborGradient) and len(self.neighbors) < 4:
                 self.state = State.MOVING
         elif self.state == State.MOVING:
-
+            if np.isnan(self.pos).any():
+                self._move(deltaTime, None)
+                return
             neighborMovePriorities = [None] * len(self.neighbors)
             for i in range(len(self.neighbors)):
                 neighborMovePriorities[i] = self.neighbors[i]._getMovePriority()
             if len(self.neighbors) == 0 or self._getMovePriority() > max(neighborMovePriorities):
-                self.addBrus()
                 closestRobot = self._findClosestRobot(deltaTime, self.neighbors)
                 if self._isInsideShape():
                     if self._isOnEdge(deltaTime) or closestRobot.gradientVal >= self.gradientVal:
@@ -155,12 +158,19 @@ class Kilobot:
             bot = self._findClosestRobot(deltaTime, self.neighbors)
             self.collision(bot)
 
-    def addBrus(self):
-        g = self.gradientVal*self.sensorError
-        if self.gradientVal > 20:
-            g = 20*self.sensorError
-        g = self.sensorError*g
-        self.pos = self.pActual + g
+    def _localize(self):
+        if len(self.neighbors) == 0:
+            self.pos = np.array([np.nan, np.nan]).T
+        minGradientNeighbor = None
+        minGradientVal = np.inf
+        for neighbor in self.neighbors:
+            if (neighbor.state == State.WAIT_TO_MOVE or neighbor.state == State.JOINED_SHAPE) and neighbor.gradientVal < minGradientVal:
+                minGradientNeighbor = neighbor
+                minGradientVal = neighbor.gradientVal
+        if minGradientNeighbor is None:
+            self.pos = np.array([np.nan, np.nan]).T
+        else:
+            self.pos = minGradientNeighbor.pos + (self.pActual - minGradientNeighbor.pActual) + self.sensorError
 
     def draw(self):
         position = (int(self.pActual[0]), int(self.pActual[1]))
@@ -179,7 +189,8 @@ class Kilobot:
 
         self.renderer.drawCircle(colorBody, position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
-        self.renderer.drawText((255, 255, 255), f"({self.sensorError:.0f})", position)
+        locError = self.pos - self.pActual
+        self.renderer.drawText((255, 255, 255), f"{locError[0]:.1f}", position)
 
     def _getNeighborGradients(self):
         neighborGradients = [None] * len(self.neighbors)
@@ -200,13 +211,14 @@ class Kilobot:
             normDist = np.sqrt(np.sum((self.pActual - bot.pActual)**2))
             normV = (bot.pActual - self.pActual)/normDist
             if normDist < 2*size:
-                self.pActual += normV*(size - normDist)*0.8
+                self.pActual += normV*(size - normDist)*0.1
 
 
 class KilobotOrigin(Kilobot):
     def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
         Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal)
         self.state = State.JOINED_SHAPE
+        self.pos = self.pActual
         self.sensorError = 0
 
 
