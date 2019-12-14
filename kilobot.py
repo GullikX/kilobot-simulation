@@ -44,7 +44,7 @@ class Kilobot:
         self.state = State.WAIT_TO_MOVE
         self.gradNeighbors = []
         self.comNeighbors = []
-        self.sensorError = np.random.normal(0, noiseStdDev)
+        self.sensorError = np.array([np.random.normal(0, noiseStdDev), np.random.normal(0, noiseStdDev)])
         self.enteredShapeTimestep = -1
 
     def _getMovePriority(self):
@@ -217,7 +217,7 @@ class KilobotOrigin(Kilobot):
         Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal)
         self.state = State.JOINED_SHAPE
         self.pos = self.pActual
-        self.sensorError = 0
+        self.sensorError = np.array([0, 0])
 
 
     def timestep(self, iTimestep, deltaTime, kilobots):
