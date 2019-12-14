@@ -12,12 +12,12 @@ colorDirectionLine = (192, 192, 192)
 size = 15
 velocity = 1
 turnSpeed = np.pi / 30
-communicationRange = 100
+communicationRange = 70
 neighborUpdateInterval = 5
 
 preferedDistance = 32 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
-gradientCommunicationRange = preferedDistance + 10
+gradientCommunicationRange = preferedDistance + 5
 noiseStdDev = 1
 stoppingTimesteps = 25
 
@@ -118,7 +118,7 @@ class Kilobot:
         closestBot = None
         for bot in self.comNeighbors:
             if bot is not self:
-                rSquared = np.sum((self.pos - bot.pos)**2)
+                rSquared = np.sum((self.pActual - bot.pActual)**2)
                 if rSquared < rmax:
                     rmax = rSquared
                     closestBot = bot
@@ -130,7 +130,8 @@ class Kilobot:
             self.move(deltaTime)
             return
 
-        diff = self.pos - nearestRobot.pos
+        nearestRobot = self.centerOfG()
+        diff = self.pActual - nearestRobot + self.sensorError
         rVector = np.append(diff, 0)
         w = np.cross(rVector, np.array([0, 0, 1]))
         wNorm = w/np.linalg.norm(w)
@@ -150,6 +151,7 @@ class Kilobot:
             self.move(deltaTime)
 
     def move(self, deltaTime):
+        self.direction += np.random.normal(0,0.1)
         dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
         self.pActual += velocity * deltaTime * dirV
         bot = self._findClosestRobot(deltaTime)
@@ -182,9 +184,11 @@ class Kilobot:
             colorBody = colorBodyJoinedShape
 
         self.renderer.drawCircle(colorBody, position, size)
+        if self.state == State.MOVING:
+            self.renderer.drawCircle(colorBody,position, gradientCommunicationRange, 1)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
         locError = self.pos - self.pActual
-        self.renderer.drawText((255, 255, 255), f"{locError[0]:.1f}", position)
+        #self.renderer.drawText((255, 255, 255), f"{locError[0]:.1f}", position)
 
     def _getNeighborGradients(self):
         neighborGradients = [None] * len(self.gradNeighbors)
@@ -207,7 +211,14 @@ class Kilobot:
             if normDist < 2*size:
                 self.pActual += normV*(size - normDist)*0.1
 
-
+    def centerOfG(self):
+        center = 0
+        for bot in self.gradNeighbors:
+            center += bot.pActual
+        if len(self.gradNeighbors) is not 0:
+            return center/len(self.gradNeighbors)
+        else:
+            return 0
 class KilobotOrigin(Kilobot):
     def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
         Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal)
