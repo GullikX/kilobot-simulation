@@ -18,7 +18,8 @@ neighborUpdateInterval = 5
 preferedDistance = 32 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
 gradientCommunicationRange = preferedDistance + 10
-noiseStdDev = 1
+noiseStdDev = 5
+directionNoiseStdDev = 0.1
 stoppingTimesteps = 25
 
 
@@ -118,7 +119,7 @@ class Kilobot:
         closestBot = None
         for bot in self.comNeighbors:
             if bot is not self:
-                rSquared = np.sum((self.pos - bot.pos)**2)
+                rSquared = np.sum((self.pActual - bot.pActual)**2)
                 if rSquared < rmax:
                     rmax = rSquared
                     closestBot = bot
@@ -130,7 +131,7 @@ class Kilobot:
             self.move(deltaTime)
             return
 
-        diff = self.pos - nearestRobot.pos
+        diff = self.pActual - nearestRobot.pActual
         rVector = np.append(diff, 0)
         w = np.cross(rVector, np.array([0, 0, 1]))
         wNorm = w/np.linalg.norm(w)
@@ -150,7 +151,10 @@ class Kilobot:
             self.move(deltaTime)
 
     def move(self, deltaTime):
-        dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
+        dirV = np.array([
+            np.cos(self.direction) + np.random.normal(0, directionNoiseStdDev),
+            np.sin(self.direction) + np.random.normal(0, directionNoiseStdDev),
+        ])
         self.pActual += velocity * deltaTime * dirV
         bot = self._findClosestRobot(deltaTime)
         self.collision(bot)
