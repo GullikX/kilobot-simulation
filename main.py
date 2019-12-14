@@ -53,6 +53,7 @@ def main():
                     running = False
 
         # Logic
+        random.shuffle(kilobots)
         for kilobot in kilobots:
             kilobot.timestep(iTimestep, deltaTime, kilobots)
 
