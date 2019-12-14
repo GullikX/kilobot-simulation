@@ -187,7 +187,9 @@ class Kilobot:
 
         self.renderer.drawCircle(colorBody, position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
-        #locError = self.pos - self.pActual
+        if self.state == State.MOVING:
+            self.renderer.drawCircle(colorBody, position, gradientCommunicationRange, 1)
+        locError = self.pos - self.pActual
         #self.renderer.drawText((255, 255, 255), f"{locError[0]:.1f}", position)
 
     def _getNeighborGradients(self):
@@ -210,7 +212,16 @@ class Kilobot:
             normV = (bot.pActual - self.pActual)/normDist
             if normDist < 2*size:
                 self.pActual += normV*(size - normDist)*0.1
-
+    def checkState(self):
+        inside = self_isInsideShape()
+        if inside == True:
+            m = np.array([x + size,y], [x - size, y], [x, y+size], x, y-size)
+            m = m/Kilobot.scalingFactor
+            for i in range(4):
+                bitMapVal = bitMapArray(m[0,i].astype(int), m[1,i].astype(int))
+                if bool(bitMapVal):
+                    return False    #outside
+        return True
 
 class KilobotOrigin(Kilobot):
     def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
