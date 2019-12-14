@@ -39,13 +39,13 @@ class Renderer:
                 self.drawRectangle(bitMapColor, coordinates, size)
 
 
-    def drawCircle(self, color, coordinates, size):
+    def drawCircle(self, color, coordinates, size, width=0):
         screenPosition = [None] * 2
         screenPosition[0] = int(coordinates[0] * self.scaleFactor + self.xOffset)
         screenPosition[1] = int(coordinates[1] * self.scaleFactor * yFlip + self.yOffset)
         screenSize = int(size * self.scaleFactor)
 
-        pygame.draw.circle(self.screen, color, screenPosition, screenSize)
+        pygame.draw.circle(self.screen, color, screenPosition, screenSize, width)
 
     def drawLine(self, color, coordinatesStart, coordinatesEnd, width):
         screenPositionStart = [None] * 2

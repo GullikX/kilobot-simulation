@@ -188,7 +188,7 @@ class Kilobot:
         self.renderer.drawCircle(colorBody, position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
         if self.state == State.MOVING:
-            self.renderer.drawCircle(colorBody, position, gradientCommunicationRange, 1)
+            self.renderer.drawCircle(colorBody, position, gradientCommunicationRange, width=1)
         locError = self.pos - self.pActual
         #self.renderer.drawText((255, 255, 255), f"{locError[0]:.1f}", position)
 
