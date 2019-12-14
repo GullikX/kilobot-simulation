@@ -158,16 +158,16 @@ class Kilobot:
     def _localize(self):
         if len(self.comNeighbors) == 0:
             self.pos = np.array([np.nan, np.nan]).T
-        minGradientNeighbor = None
-        minGradientVal = np.inf
+            return
+        posApproximations = []
         for neighbor in self.comNeighbors:
-            if (neighbor.state == State.WAIT_TO_MOVE or neighbor.state == State.JOINED_SHAPE) and neighbor.gradientVal < minGradientVal:
-                minGradientNeighbor = neighbor
-                minGradientVal = neighbor.gradientVal
-        if minGradientNeighbor is None:
+            if (neighbor.state == State.WAIT_TO_MOVE or neighbor.state == State.JOINED_SHAPE) and neighbor.gradientVal < self.gradientVal:
+                posApproximations.append(neighbor.pos + (self.pActual - neighbor.pActual) + self.sensorError)
+        if len(posApproximations) == 0:
             self.pos = np.array([np.nan, np.nan]).T
-        else:
-            self.pos = minGradientNeighbor.pos + (self.pActual - minGradientNeighbor.pActual) + self.sensorError
+            return
+        posApproximations = np.array(posApproximations)
+        self.pos = np.mean(posApproximations, axis=0)
 
     def draw(self):
         position = (int(self.pActual[0]), int(self.pActual[1]))
