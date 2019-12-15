@@ -68,7 +68,7 @@ def main():
     # Calculate score
     score = 0
     for kilobot in kilobots:
-        score += kilobot._calculateScore() / nrOfRobots
+        score += kilobot.calculateScore() / nrOfRobots
     print(f"Score: {score}")
 
     # Write state to csv files

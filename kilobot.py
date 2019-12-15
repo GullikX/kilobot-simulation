@@ -113,7 +113,7 @@ class Kilobot:
     def _isInsideShape(self):
         return isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, self.pos)
 
-    def _calculateScore(self):
+    def calculateScore(self):
         # Generate points on the robot's perimeter, calculate the fraction of them inside the shape
         theta = np.linspace(0, 2*np.pi, nScorePoints)
         xValues = self.pos[0] + size * np.cos(theta)
