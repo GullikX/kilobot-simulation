@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import datetime
 import pygame
 import numpy as np
 import random
@@ -15,6 +16,9 @@ nrOfRobots = 100
 initialPositionsFile = "data/initPos.csv"
 bitMapFile = "data/bitmap.csv"
 def main():
+    # Get current time
+    date_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
     # Load data arrays
     bitMapArray = np.loadtxt(bitMapFile)
     bitMapScalingFactor = calcScalingFactor(nrOfRobots, bitMapArray,31)
@@ -86,6 +90,17 @@ def main():
     for kilobot in kilobots:
         score += kilobot._calculateScore() / nrOfRobots
     print(f"Score: {score}")
+
+    # Write state to csv files
+    positions = np.zeros((nrOfRobots, 2))
+    states = np.zeros((nrOfRobots, 1))
+    for iBot in range(nrOfRobots):
+        bot = kilobots[iBot]
+        positions[iBot, 0] = bot.pos[0]
+        positions[iBot, 1] = bot.pos[1]
+        states[iBot, 0] = int(bot.state)
+    np.savetxt(f"{date_time}-positions.csv", positions)
+    np.savetxt(f"{date_time}-states.csv", states, fmt="%d")
 
     pygame.display.quit()
     pygame.quit()

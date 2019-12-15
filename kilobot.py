@@ -1,5 +1,5 @@
 from __future__ import division
-from enum import Enum
+from enum import IntEnum
 import heapq
 from math import sqrt
 import numpy as np
@@ -27,7 +27,7 @@ stoppingTimesteps = 25
 nScorePoints = 100
 
 
-class State(Enum):
+class State(IntEnum):
     WAIT_TO_MOVE = 1
     MOVING = 2
     JOINED_SHAPE = 3
