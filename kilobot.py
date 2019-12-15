@@ -126,6 +126,40 @@ class Kilobot:
 
         return nPointsInsideShape / nScorePoints
 
+
+    def calcOverlappingA(self):
+        thehta = np.linspace(0,2*np.pi, nScorePoints)
+        x = self.pos[0] + size * np.cos(theta)
+        y = self.pos[1] + size * np.sin(theta)
+
+        s = np.ones((Kilobot.scalingFactor, Kilobot.scalingFactor))
+        m = np.kron(Kilobot.bitMapArray, s)
+
+        boolP = False
+        p = []
+        pos = np.array([x[0],y[0]]).astype(int)
+        boolP = bool(Kilobot.bitMapArray[pos[0], pos[1]])
+        for i in range(nScorePoints):
+            pos = np.array([x[i],y[i]]).astype(int)
+            bitMapVal = Kilobot.bitMapArray[pos[0], pos[1]]
+            if len(p) < 2:
+                if boolP == True and bool(bitMapVal) == False:
+                    p.append(i)
+                    boolP = False
+                elif boolP == False and bool(bitMapVal) == True:
+                    p.append(i)
+                    boolP = True
+
+
+        arcLength = theta[p[0]] - thetha[p[1]]
+        centralAngle = arclength/size
+        partialSquareArea = np.pi*size**2*(np.pi/180*centralAngle - np.sin(centralAngle)
+
+        if boolP == True:
+            partialSquareArea = np.pi**2 - partialSquareArea
+
+        return partialSquareArea
+
     def _findClosestRobot(self, deltaTime):
         rmax = np.inf
         closestBot = None
