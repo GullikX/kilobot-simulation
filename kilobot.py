@@ -132,16 +132,13 @@ class Kilobot:
         x = self.pos[0] + size * np.cos(theta)
         y = self.pos[1] + size * np.sin(theta)
 
-        s = np.ones((Kilobot.scalingFactor, Kilobot.scalingFactor))
-        m = np.kron(Kilobot.bitMapArray, s)
-
         boolP = False
         p = []
         pos = np.array([x[0],y[0]]).astype(int)
-        boolP = bool(Kilobot.bitMapArray[pos[0], pos[1]])
+        boolP = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
         for i in range(nScorePoints):
             pos = np.array([x[i],y[i]]).astype(int)
-            bitMapVal = Kilobot.bitMapArray[pos[0], pos[1]]
+            bitMapVal = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
             if len(p) < 2:
                 if boolP == True and bool(bitMapVal) == False:
                     p.append(i)
