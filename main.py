@@ -5,8 +5,8 @@ import random
 import sys
 
 from kilobot import Kilobot, KilobotOrigin
-from renderer import Renderer
-#from rendererdummy import Renderer
+#from renderer import Renderer
+from rendererdummy import Renderer
 from helpers import generateBotCoords, calcScalingFactor
 deltaTime = 1
 nKilobotsOrigin = 4
@@ -43,22 +43,25 @@ def main():
             kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
 
     iTimestep = 0
-    while renderer.running:
-        renderer.handleEvents()
+    try:
+        while renderer.running:
+            renderer.handleEvents()
 
-        # Logic
-        random.shuffle(kilobots)
-        for kilobot in kilobots:
-            kilobot.timestep(iTimestep, deltaTime, kilobots)
+            # Logic
+            random.shuffle(kilobots)
+            for kilobot in kilobots:
+                kilobot.timestep(iTimestep, deltaTime, kilobots)
 
-        # Drawing
-        renderer.clearScreen()
-        renderer.drawBitMap()
-        for kilobot in kilobots:
-            kilobot.draw()
-        renderer.updateDisplay()
+            # Drawing
+            renderer.clearScreen()
+            renderer.drawBitMap()
+            for kilobot in kilobots:
+                kilobot.draw()
+            renderer.updateDisplay()
 
-        iTimestep += 1
+            iTimestep += 1
+    except KeyboardInterrupt:
+        pass
 
     renderer.quit()
 
