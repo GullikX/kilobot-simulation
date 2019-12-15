@@ -6,7 +6,6 @@ import numpy as np
 import time
 
 from helpers import isInsideShape
-from spatialmap import SpatialMap
 
 colorBodyWaiting = (229, 57, 53)
 colorBodyMoving = (66, 175, 80)
@@ -27,11 +26,6 @@ directionNoiseStdDev = 0.1
 stoppingTimesteps = 25
 nScorePoints = 100
 
-spatialMapGridSize = 7  # [mm]
-spatialMapCells = 300
-areaSize = spatialMapGridSize * spatialMapCells - 2*communicationRange  # [mm]
-areaBoundaryColor = (189, 189, 189)
-
 
 class State(IntEnum):
     WAIT_TO_MOVE = 1
@@ -42,7 +36,6 @@ class State(IntEnum):
 class Kilobot:
     bitMapArray = []
     scalingFactor = 0
-    spatialMap = SpatialMap(spatialMapGridSize, spatialMapCells)
     def __init__ (self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
         self.renderer = renderer
         Kilobot.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
@@ -57,7 +50,6 @@ class Kilobot:
         self.comNeighbors = []
         self.sensorError = np.array([np.random.normal(0, noiseStdDev), np.random.normal(0, noiseStdDev)])
         self.enteredShapeTimestep = -1
-        Kilobot.spatialMap.addEntry(self, self.pActual)
 
     def _getMovePriority(self):
         if self.state != State.MOVING:
@@ -68,14 +60,20 @@ class Kilobot:
         return -angle
 
     def _getNeighbors(self, kilobots):
-        self.gradNeighbors = Kilobot.spatialMap.getNeighbors(self, self.pActual, gradientCommunicationRange)
-        self.comNeighbors = Kilobot.spatialMap.getNeighbors(self, self.pActual, communicationRange)
-
+        gradNeighbors = []
+        comNeighbors = []
+        for bot in kilobots:
+            if bot is self:
+                continue
+            diff = np.sum((self.pActual - bot.pActual)**2)
+            if diff <= communicationRange**2:
+                comNeighbors.append(bot)
+                if diff <= gradientCommunicationRange**2:
+                    gradNeighbors.append(bot)
+        self.gradNeighbors = gradNeighbors
+        self.comNeighbors = comNeighbors
 
     def timestep(self, iTimestep, deltaTime, kilobots):
-        if self.state == State.JOINED_SHAPE:
-            return  # do nothing
-
         self._localize()
 
         # Calculate gradient value
@@ -91,25 +89,26 @@ class Kilobot:
             if self.gradientVal < np.inf and self.gradientVal >= maxNeighborGradient and nNeighborsMoving == 0:
                 self.state = State.MOVING
         elif self.state == State.MOVING:
-            Kilobot.spatialMap.removeEntry(self, self.pActual)
             if np.isnan(self.pos).any():
                 self._edgeFollow(deltaTime, None)
-            else:
-                neighborMovePriorities = [None] * len(self.comNeighbors)
-                for i in range(len(self.comNeighbors)):
-                    neighborMovePriorities[i] = self.comNeighbors[i]._getMovePriority()
-                if len(self.comNeighbors) == 0 or self._getMovePriority() > max(neighborMovePriorities):
-                    closestRobot = self._findClosestRobot(deltaTime)
-                    self._edgeFollow(deltaTime,closestRobot)
+                return
+            neighborMovePriorities = [None] * len(self.comNeighbors)
+            for i in range(len(self.comNeighbors)):
+                neighborMovePriorities[i] = self.comNeighbors[i]._getMovePriority()
+            if len(self.comNeighbors) == 0 or self._getMovePriority() > max(neighborMovePriorities):
+                closestRobot = self._findClosestRobot(deltaTime)
+                self._edgeFollow(deltaTime,closestRobot)
 
-                isInsideShape = self._isInsideShape()
-                if isInsideShape and self.enteredShapeTimestep == -1:
-                        self.enteredShapeTimestep = iTimestep
-                elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
-                         (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
-                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal)):
-                    self.state = State.JOINED_SHAPE
-            Kilobot.spatialMap.addEntry(self, self.pActual)
+            isInsideShape = self._isInsideShape()
+            if isInsideShape and self.enteredShapeTimestep == -1:
+                    self.enteredShapeTimestep = iTimestep
+            elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
+                     (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
+                    (isInsideShape and closestRobot.gradientVal >= self.gradientVal)):
+                self.state = State.JOINED_SHAPE
+
+        elif self.state == State.JOINED_SHAPE:
+            pass  # do nothing
 
     def _isInsideShape(self):
         return isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, self.pos)
@@ -171,17 +170,6 @@ class Kilobot:
         self.pActual += velocity * deltaTime * dirV
         bot = self._findClosestRobot(deltaTime)
         self.collision(bot)
-        self._wrap()
-
-    def _wrap(self):
-        if self.pActual[0] < areaSize/2:
-            self.pActual[0] += areaSize
-        if self.pActual[1] < areaSize/2:
-            self.pActual[1] += areaSize
-        if self.pActual[0] > areaSize/2:
-            self.pActual[0] -= areaSize
-        if self.pActual[1] > areaSize/2:
-            self.pActual[1] -= areaSize
 
     def _localize(self):
         posApproximations = []
@@ -213,14 +201,7 @@ class Kilobot:
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
         if self.state == State.MOVING:
             self.renderer.drawCircle(colorBody, position, gradientCommunicationRange, width=1)
-
-        self.renderer.drawRectangle(
-                areaBoundaryColor,
-                (-areaSize/2,)*2,
-                (areaSize,)*2,
-                width=3,
-        )
-        #locError = self.pos - self.pActual
+        locError = self.pos - self.pActual
         #self.renderer.drawText((255, 255, 255), f"{locError[0]:.1f}", position)
 
     def _getNeighborGradients(self):
@@ -246,8 +227,8 @@ class Kilobot:
 
     def calcOverlappingA(self):
         thehta = np.linspace(0,2*np.pi, nScorePoints)
-        x = self.pos[0] + size * np.cos(theta)
-        y = self.pos[1] + size * np.sin(theta)
+        x = self.pos[0] + size * np.cos(thehta)
+        y = self.pos[1] + size * np.sin(thehta)
         p = []
         pos = np.array([x[0],y[0]]).astype(int)
         boolP = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
@@ -262,13 +243,16 @@ class Kilobot:
                     p.append(i)
                     boolP = True
 
-        arcLength = theta[p[0]] - thetha[p[1]]
-        centralAngle = arclength/size
-        partialSquareArea = np.pi*size**2*(np.pi/180*centralAngle - np.sin(centralAngle))
+        if len(p) == 0 and boolP == True:
+            return np.pi*size**2
+        elif len(p) == 0 and boolP == False:
+            return 0
+        centralAngle = thehta[p[1]] -  thehta[p[0]]
+        partialSquareArea = size**2/2*(centralAngle - (np.sin(centralAngle)))
+        if boolP == False:
+            partialSquareArea = np.pi*size**2 - partialSquareArea
+        return (partialSquareArea)    
 
-        if boolP:
-            partialSquareArea = np.pi**2 - partialSquareArea
-        return partialSquareArea
 
 class KilobotOrigin(Kilobot):
     def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
