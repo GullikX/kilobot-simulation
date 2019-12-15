@@ -126,37 +126,6 @@ class Kilobot:
 
         return nPointsInsideShape / nScorePoints
 
-
-    def calcOverlappingA(self):
-        thehta = np.linspace(0,2*np.pi, nScorePoints)
-        x = self.pos[0] + size * np.cos(theta)
-        y = self.pos[1] + size * np.sin(theta)
-
-        boolP = False
-        p = []
-        pos = np.array([x[0],y[0]]).astype(int)
-        boolP = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
-        for i in range(nScorePoints):
-            pos = np.array([x[i],y[i]]).astype(int)
-            bitMapVal = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
-            if len(p) < 2:
-                if boolP == True and bool(bitMapVal) == False:
-                    p.append(i)
-                    boolP = False
-                elif boolP == False and bool(bitMapVal) == True:
-                    p.append(i)
-                    boolP = True
-
-
-        arcLength = theta[p[0]] - thetha[p[1]]
-        centralAngle = arclength/size
-        partialSquareArea = np.pi*size**2*(np.pi/180*centralAngle - np.sin(centralAngle)
-
-        if boolP == True:
-            partialSquareArea = np.pi**2 - partialSquareArea
-
-        return partialSquareArea
-
     def _findClosestRobot(self, deltaTime):
         rmax = np.inf
         closestBot = None
@@ -256,6 +225,31 @@ class Kilobot:
             if normDist < 2*size:
                 self.pActual += normV*(size - normDist)*0.1
 
+    def calcOverlappingA(self):
+        thehta = np.linspace(0,2*np.pi, nScorePoints)
+        x = self.pos[0] + size * np.cos(theta)
+        y = self.pos[1] + size * np.sin(theta)
+        p = []
+        pos = np.array([x[0],y[0]]).astype(int)
+        boolP = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
+        for i in range(nScorePoints):
+            pos = np.array([x[i],y[i]]).astype(int)
+            bitMapVal = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
+            if len(p) < 2:
+                if boolP == True and bool(bitMapVal) == False:
+                    p.append(i)
+                    boolP = False
+                elif boolP == False and bool(bitMapVal) == True:
+                    p.append(i)
+                    boolP = True
+
+        arcLength = theta[p[0]] - thetha[p[1]]
+        centralAngle = arclength/size
+        partialSquareArea = np.pi*size**2*(np.pi/180*centralAngle - np.sin(centralAngle))
+
+        if boolP:
+            partialSquareArea = np.pi**2 - partialSquareArea
+        return partialSquareArea
 
 class KilobotOrigin(Kilobot):
     def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
