@@ -41,16 +41,16 @@ class Renderer:
                     self.running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    self.dragStart(event)
+                    self._dragStart(event)
                 if event.button == 4:
-                    self.zoomIn()
+                    self._zoomIn()
                 elif event.button == 5:
-                    self.zoomOut()
+                    self._zoomOut()
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    self.dragStop()
+                    self._dragStop()
             elif event.type == pygame.MOUSEMOTION:
-                self.drag(event)
+                self._drag(event)
 
     def clearScreen(self):
         self.screen.fill(backgroundColor)
@@ -62,7 +62,7 @@ class Renderer:
                     continue
                 coordinates = (j * self.bitMapScalingFactor, i * self.bitMapScalingFactor)
                 size = (self.bitMapScalingFactor, self.bitMapScalingFactor)
-                self.drawRectangle(bitMapColor, coordinates, size)
+                self._drawRectangle(bitMapColor, coordinates, size)
 
 
     def drawCircle(self, color, coordinates, size, width=0):
@@ -86,7 +86,7 @@ class Renderer:
 
         pygame.draw.line(self.screen, color, screenPositionStart, screenPositionEnd, screenWidth)
 
-    def drawRectangle(self, color, coordinates, size):
+    def _drawRectangle(self, color, coordinates, size):
         screenPosition = [None] * 2
         screenPosition[0] = int(coordinates[0] * self.scaleFactor + self.xOffset)
         screenPosition[1] = int(coordinates[1] * self.scaleFactor * yFlip + self.yOffset)
@@ -125,20 +125,20 @@ class Renderer:
         pygame.display.quit()
         pygame.quit()
 
-    def zoomIn(self):
+    def _zoomIn(self):
         self.scaleFactor *= zoomInFactor
 
-    def zoomOut(self):
+    def _zoomOut(self):
         self.scaleFactor *= zoomOutFactor
 
-    def dragStart(self, event):
+    def _dragStart(self, event):
         self.dragging = True
         self.dragStartPos = (self.xOffset - event.pos[0], self.yOffset - event.pos[1])
 
-    def drag(self, event):
+    def _drag(self, event):
         if self.dragging:
             self.xOffset = self.dragStartPos[0] + event.pos[0]
             self.yOffset = self.dragStartPos[1] + event.pos[1]
 
-    def dragStop(self):
+    def _dragStop(self):
         self.dragging = False

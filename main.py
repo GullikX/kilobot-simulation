@@ -59,6 +59,8 @@ def main():
 
         iTimestep += 1
 
+    renderer.quit()
+
     # Calculate score
     score = 0
     for kilobot in kilobots:
