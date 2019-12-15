@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import datetime
-import pygame
 import numpy as np
 import random
 import sys
@@ -8,8 +7,6 @@ import sys
 from kilobot import Kilobot, KilobotOrigin
 from renderer import Renderer
 from helpers import generateBotCoords, calcScalingFactor
-windowSize = (1280, 720)
-fps = 60
 deltaTime = 1
 nKilobotsOrigin = 4
 nrOfRobots = 100
@@ -24,11 +21,9 @@ def main():
     bitMapScalingFactor = calcScalingFactor(nrOfRobots, bitMapArray,31)
 #    initialPositions = np.loadtxt(initialPositionsFile)
     initialPositions = generateBotCoords(nrOfRobots, 35)
-    # Init pygame
-    pygame.init()
-    fpsClock = pygame.time.Clock()
-    renderer = Renderer(windowSize, bitMapArray, bitMapScalingFactor)
-    running = True
+
+    # Create graphical window
+    renderer = Renderer(bitMapArray, bitMapScalingFactor)
 
     # Create kilobots
     nKilobots = np.shape(initialPositions)[0]
@@ -47,26 +42,8 @@ def main():
             kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
 
     iTimestep = 0
-    while running:
-        # Input
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    renderer.dragStart(event)
-                if event.button == 4:
-                    renderer.zoomIn()
-                elif event.button == 5:
-                    renderer.zoomOut()
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1:
-                    renderer.dragStop()
-            elif event.type == pygame.MOUSEMOTION:
-                renderer.drag(event)
+    while renderer.running:
+        renderer.handleEvents()
 
         # Logic
         random.shuffle(kilobots)
@@ -80,9 +57,6 @@ def main():
             kilobot.draw()
         renderer.updateDisplay()
 
-        # Wait until next frame
-        fpsClock.tick(fps)
-        #print(f"FPS: {fpsClock.get_fps()}")
         iTimestep += 1
 
     # Calculate score
@@ -101,10 +75,6 @@ def main():
         states[iBot, 0] = int(bot.state)
     np.savetxt(f"{date_time}-positions.csv", positions)
     np.savetxt(f"{date_time}-states.csv", states, fmt="%d")
-
-    pygame.display.quit()
-    pygame.quit()
-    sys.exit()
 
 if __name__ == "__main__":
     main()

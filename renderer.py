@@ -5,6 +5,8 @@ backgroundColor = (20, 20, 20)
 bitMapColor = (50, 50, 50)
 windowCaption = "Kilobot simulation"
 
+windowSize = (1280, 720)
+fps = 60
 scaleFactor = 1.2
 fontSizeFactor = 15
 xOffset = 640
@@ -15,16 +17,40 @@ zoomOutFactor = 0.9
 
 
 class Renderer:
-    def __init__(self, windowSize, bitMapArray, bitMapScalingFactor):
-        self.screen = pygame.display.set_mode(windowSize)
+    def __init__(self, bitMapArray, bitMapScalingFactor):
         self.bitMapArray = np.flipud(bitMapArray)
         self.bitMapScalingFactor = bitMapScalingFactor
         self.scaleFactor = scaleFactor
         self.xOffset = xOffset
         self.yOffset = yOffset
-        pygame.display.set_caption(windowCaption)
         self.dragging = False
         self.dragStartPos = (0, 0)
+
+        pygame.init()
+        self.screen = pygame.display.set_mode(windowSize)
+        pygame.display.set_caption(windowCaption)
+        self.fpsClock = pygame.time.Clock()
+        self.running = True
+
+    def handleEvents(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    self.dragStart(event)
+                if event.button == 4:
+                    self.zoomIn()
+                elif event.button == 5:
+                    self.zoomOut()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    self.dragStop()
+            elif event.type == pygame.MOUSEMOTION:
+                self.drag(event)
 
     def clearScreen(self):
         self.screen.fill(backgroundColor)
@@ -92,6 +118,12 @@ class Renderer:
 
     def updateDisplay(self):
         pygame.display.update()
+        self.fpsClock.tick(fps)
+        #print(f"FPS: {self.fpsClock.get_fps()}")
+
+    def quit(self):
+        pygame.display.quit()
+        pygame.quit()
 
     def zoomIn(self):
         self.scaleFactor *= zoomInFactor
