@@ -13,6 +13,7 @@ nKilobotsOrigin = 4
 nrOfRobots = 100
 initialPositionsFile = "data/initPos.csv"
 bitMapFile = "data/bitmap.csv"
+
 def main():
     # Get current time
     date_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -42,6 +43,7 @@ def main():
             gradientVal = np.inf
             kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
 
+    # Run simulation
     iTimestep = 0
     try:
         while renderer.running:
