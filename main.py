@@ -6,6 +6,7 @@ import sys
 
 from kilobot import Kilobot, KilobotOrigin
 from renderer import Renderer
+#from rendererdummy import Renderer
 from helpers import generateBotCoords, calcScalingFactor
 deltaTime = 1
 nKilobotsOrigin = 4
