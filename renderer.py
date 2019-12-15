@@ -62,7 +62,7 @@ class Renderer:
                     continue
                 coordinates = (j * self.bitMapScalingFactor, i * self.bitMapScalingFactor)
                 size = (self.bitMapScalingFactor, self.bitMapScalingFactor)
-                self._drawRectangle(bitMapColor, coordinates, size)
+                self.drawRectangle(bitMapColor, coordinates, size)
 
 
     def drawCircle(self, color, coordinates, size, width=0):
@@ -86,7 +86,7 @@ class Renderer:
 
         pygame.draw.line(self.screen, color, screenPositionStart, screenPositionEnd, screenWidth)
 
-    def _drawRectangle(self, color, coordinates, size):
+    def drawRectangle(self, color, coordinates, size, width=0):
         screenPosition = [None] * 2
         screenPosition[0] = int(coordinates[0] * self.scaleFactor + self.xOffset)
         screenPosition[1] = int(coordinates[1] * self.scaleFactor * yFlip + self.yOffset)
@@ -100,7 +100,7 @@ class Renderer:
             screenSize[0], screenSize[1],
         )
 
-        pygame.draw.rect(self.screen, color, rect)
+        pygame.draw.rect(self.screen, color, rect, width)
 
     def drawText(self, color, string, coordinates):
         screenPosition = [None] * 2

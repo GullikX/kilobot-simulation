@@ -28,7 +28,10 @@ stoppingTimesteps = 25
 nScorePoints = 100
 
 spatialMapGridSize = 7  # [mm]
-spatialMapCells = 1000
+spatialMapCells = 300
+areaSize = spatialMapGridSize * spatialMapCells - 2*communicationRange  # [mm]
+areaBoundaryColor = (189, 189, 189)
+
 
 class State(IntEnum):
     WAIT_TO_MOVE = 1
@@ -168,6 +171,17 @@ class Kilobot:
         self.pActual += velocity * deltaTime * dirV
         bot = self._findClosestRobot(deltaTime)
         self.collision(bot)
+        self._wrap()
+
+    def _wrap(self):
+        if self.pActual[0] < areaSize/2:
+            self.pActual[0] += areaSize
+        if self.pActual[1] < areaSize/2:
+            self.pActual[1] += areaSize
+        if self.pActual[0] > areaSize/2:
+            self.pActual[0] -= areaSize
+        if self.pActual[1] > areaSize/2:
+            self.pActual[1] -= areaSize
 
     def _localize(self):
         posApproximations = []
@@ -199,7 +213,14 @@ class Kilobot:
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
         if self.state == State.MOVING:
             self.renderer.drawCircle(colorBody, position, gradientCommunicationRange, width=1)
-        locError = self.pos - self.pActual
+
+        self.renderer.drawRectangle(
+                areaBoundaryColor,
+                (-areaSize/2,)*2,
+                (areaSize,)*2,
+                width=3,
+        )
+        #locError = self.pos - self.pActual
         #self.renderer.drawText((255, 255, 255), f"{locError[0]:.1f}", position)
 
     def _getNeighborGradients(self):
