@@ -4,6 +4,9 @@ import heapq
 from math import sqrt
 import numpy as np
 import time
+
+from helpers import isInsideShape
+
 colorBodyWaiting = (229, 57, 53)
 colorBodyMoving = (66, 175, 80)
 colorBodyJoinedShape = (25, 118, 210)
@@ -21,6 +24,7 @@ gradientCommunicationRange = preferedDistance + 10
 noiseStdDev = 5
 directionNoiseStdDev = 0.1
 stoppingTimesteps = 25
+nScorePoints = 100
 
 
 class State(Enum):
@@ -32,7 +36,6 @@ class State(Enum):
 class Kilobot:
     bitMapArray = []
     scalingFactor = 0
-    finalPos = []
     def __init__ (self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
         self.renderer = renderer
         Kilobot.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
@@ -103,18 +106,25 @@ class Kilobot:
                      (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
                     (isInsideShape and closestRobot.gradientVal >= self.gradientVal)):
                 self.state = State.JOINED_SHAPE
-                Kilobot.finalPos.append(np.ndarray.tolist(self.pos))
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
 
     def _isInsideShape(self):
-        dim = np.multiply(Kilobot.bitMapArray.shape,Kilobot.scalingFactor)
-        if np.all(self.pos >= 0) and np.all(self.pos < dim):
-            p = self.pos/Kilobot.scalingFactor
-            bitMapVal = Kilobot.bitMapArray[p[0].astype(int), p[1].astype(int)]
-            return bool(bitMapVal)
-        return False
+        return isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, self.pos)
+
+    def _calculateScore(self):
+        # Generate points on the robot's perimeter, calculate the fraction of them inside the shape
+        theta = np.linspace(0, 2*np.pi, nScorePoints)
+        xValues = self.pos[0] + size * np.cos(theta)
+        yValues = self.pos[1] + size * np.sin(theta)
+
+        nPointsInsideShape = 0
+        for i in range(nScorePoints):
+            pos = np.array((xValues[i], yValues[i]))
+            nPointsInsideShape += int(isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos))
+
+        return nPointsInsideShape / nScorePoints
 
     def _findClosestRobot(self, deltaTime):
         rmax = np.inf
@@ -222,8 +232,6 @@ class KilobotOrigin(Kilobot):
         self.state = State.JOINED_SHAPE
         self.pos = self.pActual
         self.sensorError = np.array([0, 0])
-        Kilobot.finalPos.append(np.ndarray.tolist(self.pos))
-        print(Kilobot.finalPos)
 
     def timestep(self, iTimestep, deltaTime, kilobots):
         pass

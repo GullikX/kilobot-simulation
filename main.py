@@ -81,6 +81,12 @@ def main():
         #print(f"FPS: {fpsClock.get_fps()}")
         iTimestep += 1
 
+    # Calculate score
+    score = 0
+    for kilobot in kilobots:
+        score += kilobot._calculateScore() / nrOfRobots
+    print(f"Score: {score}")
+
     pygame.display.quit()
     pygame.quit()
     sys.exit()

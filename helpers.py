@@ -10,6 +10,15 @@ def calcScalingFactor(n, bitArray, d, k=1.2,k2=0.05):
     return bitMapScalingFactor
 
 
+def isInsideShape(bitMapArray, scalingFactor, pos):
+    dim = np.multiply(bitMapArray.shape, scalingFactor)
+    if np.all(pos >= 0) and np.all(pos < dim):
+        p = pos/scalingFactor
+        bitMapVal = bitMapArray[p[0].astype(int), p[1].astype(int)]
+        return bool(bitMapVal)
+    return False
+
+
 def generateBotCoords(nrOfBots,preferedDistance):
     fourInitial = [[-1/2,0],[0, -np.sqrt(3)/2],
                     [1/2,0], [0, np.sqrt(3)/2]]
