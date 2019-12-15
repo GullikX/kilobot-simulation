@@ -32,6 +32,7 @@ class State(Enum):
 class Kilobot:
     bitMapArray = []
     scalingFactor = 0
+    finalPos = []
     def __init__ (self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
         self.renderer = renderer
         Kilobot.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
@@ -102,6 +103,7 @@ class Kilobot:
                      (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
                     (isInsideShape and closestRobot.gradientVal >= self.gradientVal)):
                 self.state = State.JOINED_SHAPE
+                Kilobot.finalPos.append(np.ndarray.tolist(self.pos))
 
         elif self.state == State.JOINED_SHAPE:
             pass  # do nothing
@@ -212,16 +214,7 @@ class Kilobot:
             normV = (bot.pActual - self.pActual)/normDist
             if normDist < 2*size:
                 self.pActual += normV*(size - normDist)*0.1
-    def checkState(self):
-        inside = self_isInsideShape()
-        if inside == True:
-            m = np.array([x + size,y], [x - size, y], [x, y+size], x, y-size)
-            m = m/Kilobot.scalingFactor
-            for i in range(4):
-                bitMapVal = bitMapArray(m[0,i].astype(int), m[1,i].astype(int))
-                if bool(bitMapVal):
-                    return False    #outside
-        return True
+
 
 class KilobotOrigin(Kilobot):
     def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
@@ -229,7 +222,8 @@ class KilobotOrigin(Kilobot):
         self.state = State.JOINED_SHAPE
         self.pos = self.pActual
         self.sensorError = np.array([0, 0])
-
+        Kilobot.finalPos.append(np.ndarray.tolist(self.pos))
+        print(Kilobot.finalPos)
 
     def timestep(self, iTimestep, deltaTime, kilobots):
         pass
