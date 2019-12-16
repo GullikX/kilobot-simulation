@@ -94,8 +94,8 @@ def main():
     states = np.zeros((nrOfRobots, 1))
     for iBot in range(nrOfRobots):
         bot = kilobots[iBot]
-        positions[iBot, 0] = bot.pos[0]
-        positions[iBot, 1] = bot.pos[1]
+        positions[iBot, 0] = bot.pActual[0]
+        positions[iBot, 1] = bot.pActual[1]
         positions[iBot, 2] = bot.direction
         states[iBot, 0] = int(bot.state)
     np.savetxt(f"{date_time}-positions.csv", positions)
