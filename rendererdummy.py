@@ -17,6 +17,9 @@ class Renderer:
     def drawLine(self, color, coordinatesStart, coordinatesEnd, width):
         pass
 
+    def drawRectangle(self, color, coordinates, size, width=0):
+        pass
+
     def drawText(self, color, string, coordinates):
         pass
 
