@@ -106,6 +106,7 @@ class Kilobot:
                     self._edgeFollow(deltaTime,closestRobot)
 
                 isInsideShape = self._isInsideShape()
+                closestRobot = self._findClosestRobot(deltaTime)
                 dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
                 v = closestRobot.pos - self.pos
                 d = np.dot(dirV, v)/np.linalg.norm(v)
@@ -114,7 +115,7 @@ class Kilobot:
                         self.enteredShapeTimestep = iTimestep
                 elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
                          (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
-                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal and d > np.sin(pi/6))):
+                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal and d > np.sin(np.pi/6))):
                     self.state = State.JOINED_SHAPE
             Kilobot.spatialMap.addEntry(self, self.pActual)
 
@@ -270,6 +271,9 @@ class Kilobot:
         if boolP == False:
             partialSquareArea = np.pi*size**2 - partialSquareArea
         return (partialSquareArea)
+
+    def resetSpatialMap(self):
+        Kilobot.spatialMap = SpatialMap(spatialMapGridSize, spatialMapCells)
 
 
 class KilobotOrigin(Kilobot):
