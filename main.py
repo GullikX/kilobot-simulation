@@ -10,7 +10,7 @@ from renderer import Renderer
 from helpers import generateBotCoords, calcScalingFactor
 deltaTime = 1
 nKilobotsOrigin = 4
-nrOfRobots = 100
+nrOfRobots = 20
 initialPositionsFile = "data/initPos.csv"
 bitMapFile = "data/bitmap.csv"
 
@@ -70,7 +70,9 @@ def main():
     # Calculate score
     score = 0
     for kilobot in kilobots:
-        score += kilobot.calculateScore() / nrOfRobots
+        score += kilobot.calcOverlappingA()
+    figArea = np.sum(bitMapArray)*bitMapScalingFactor**2
+    score = score/figArea
     print(f"Score: {score}")
 
     # Write state to csv files
