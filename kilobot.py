@@ -8,9 +8,11 @@ import time
 from helpers import isInsideShape
 from spatialmap import SpatialMap
 
-colorBodyWaiting = (229, 57, 53)
-colorBodyMoving = (66, 175, 80)
-colorBodyJoinedShape = (25, 118, 210)
+colorBody = (
+    (229, 57, 53),   # Waiting
+    (66, 175, 80),   # Moving
+    (25, 118, 210),  # Joined shape
+)
 colorDirectionLine = (192, 192, 192)
 
 size = 15
@@ -206,18 +208,10 @@ class Kilobot:
             int(self.pActual[1] + np.sin(self.direction) * size),
         )
 
-
-        if self.state == State.WAIT_TO_MOVE:
-            colorBody = colorBodyWaiting
-        elif self.state == State.MOVING:
-            colorBody = colorBodyMoving
-        elif self.state == State.JOINED_SHAPE:
-            colorBody = colorBodyJoinedShape
-
-        self.renderer.drawCircle(colorBody, position, size)
+        self.renderer.drawCircle(colorBody[self.state], position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
         if self.state == State.MOVING:
-            self.renderer.drawCircle(colorBody, position, gradientCommunicationRange, width=1)
+            self.renderer.drawCircle(colorBody[self.state], position, gradientCommunicationRange, width=1)
 
         self.renderer.drawRectangle(
                 areaBoundaryColor,
