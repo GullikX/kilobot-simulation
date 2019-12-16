@@ -90,12 +90,13 @@ def main():
     print(f"Score: {score}")
 
     # Write state to csv files
-    positions = np.zeros((nrOfRobots, 2))
+    positions = np.zeros((nrOfRobots, 3))
     states = np.zeros((nrOfRobots, 1))
     for iBot in range(nrOfRobots):
         bot = kilobots[iBot]
         positions[iBot, 0] = bot.pos[0]
         positions[iBot, 1] = bot.pos[1]
+        positions[iBot, 2] = bot.direction
         states[iBot, 0] = int(bot.state)
     np.savetxt(f"{date_time}-positions.csv", positions)
     np.savetxt(f"{date_time}-states.csv", states, fmt="%d")
