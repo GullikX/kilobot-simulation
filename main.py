@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 import random
 import sys
-
+import pandas
 from kilobot import Kilobot, KilobotOrigin, State
 #from renderer import Renderer
 from rendererdummy import Renderer
@@ -110,11 +110,14 @@ def main(nrOfBots, initialPositionsFile, bitMapFile, saveState=False):
 listOfNrOfRobots = [10, 20, 50, 100, 150, 300, 500, 700, 800, 900, 1000]
 for i in range(len(listOfNrOfRobots)):
     nrOfRobots = listOfNrOfRobots[i]
-    data = {}
+    d = []
     score = 0
     for n in range(5):
         score += main(nrOfRobots, initialPositionsFile, bitMapFile)
-    data = {str(nrOfRobots), score/5}
+    d.append(score/5)
+    df = pandas.DataFrame(data={"col1": listOfNrOfRobots, "col2": d})
+    df.to_csv("./data.csv", sep=',' , index=False)
+
 
 if __name__ == "__main__":
     main()
