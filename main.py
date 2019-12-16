@@ -22,10 +22,7 @@ def main(nrOfBots, initialPositionsFile, bitMapFile, saveState=False):
     # Load data arrays
     bitMapArray = np.loadtxt(bitMapFile)
     bitMapScalingFactor = calcScalingFactor(nrOfRobots, bitMapArray,31)
-#    initialPositions = np.loadtxt(initialPositionsFile)
     initialPositions = generateBotCoords(nrOfRobots, 35)
-
-    # Create graphical window
     renderer = Renderer(bitMapArray, bitMapScalingFactor)
 
     # Create kilobots
@@ -38,11 +35,13 @@ def main(nrOfBots, initialPositionsFile, bitMapFile, saveState=False):
                 gradientVal = 0
             else:
                 gradientVal = 1
-            kilobots[iKilobot] = KilobotOrigin(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal, nrOfRobots)
+            kilobots[iKilobot] = KilobotOrigin(renderer, initialPositions[iKilobot],
+                    startAngle, bitMapArray, bitMapScalingFactor, gradientVal, nrOfRobots)
         else:
             startAngle = random.uniform(0, 2*np.pi)
             gradientVal = np.inf
-            kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal, nrOfRobots)
+            kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot],
+                startAngle, bitMapArray, bitMapScalingFactor, gradientVal, nrOfRobots)
     nRobotsPerStatePrev = [0, 0, nKilobotsOrigin]
 
     # Run simulation
@@ -108,15 +107,17 @@ def main(nrOfBots, initialPositionsFile, bitMapFile, saveState=False):
 
 
 listOfNrOfRobots = [10, 20, 50, 100, 150, 300, 500, 700, 800, 900, 1000]
+d = []
 for i in range(len(listOfNrOfRobots)):
     nrOfRobots = listOfNrOfRobots[i]
-    d = []
     score = 0
     for n in range(5):
         score += main(nrOfRobots, initialPositionsFile, bitMapFile)
     d.append(score/5)
-    df = pandas.DataFrame(data={"col1": listOfNrOfRobots, "col2": d})
-    df.to_csv("./data.csv", sep=',' , index=False)
+
+print(d)
+df = pandas.DataFrame(data={"col1": listOfNrOfRobots, "col2": d})
+df.to_csv("./data.csv", sep=',' , index=False)
 
 
 if __name__ == "__main__":
