@@ -10,7 +10,7 @@ from renderer import Renderer
 from helpers import generateBotCoords, calcScalingFactor
 deltaTime = 1
 nKilobotsOrigin = 4
-nrOfRobots = 20
+nrOfRobots = 100
 initialPositionsFile = "data/initPos.csv"
 bitMapFile = "data/bitmap.csv"
 stopCriteriaCheckInterval = 10000  # timesteps
@@ -43,7 +43,7 @@ def main():
             startAngle = random.uniform(0, 2*np.pi)
             gradientVal = np.inf
             kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
-    nRobotsJoinedShapePrevious = nKilobotsOrigin
+    nRobotsPerStatePrev = [0, 0, nKilobotsOrigin]
 
     # Run simulation
     iTimestep = 0
@@ -65,16 +65,15 @@ def main():
 
             # Stop simulation if no new bots have joined the shape in a long time
             if iTimestep % stopCriteriaCheckInterval == 0:
-                nRobotsJoinedShape = 0
+                nRobotsPerState = [0, 0, 0]
                 for kilobot in kilobots:
-                    if kilobot.state == State.JOINED_SHAPE:
-                        nRobotsJoinedShape += 1
-                print(f"[Timestep {iTimestep}] Number of robots in shape: {nRobotsJoinedShape}")
-                if (nRobotsJoinedShape > nKilobotsOrigin and
-                        nRobotsJoinedShape ==  nRobotsJoinedShapePrevious):
-                    print("No new robots have joined the shape since last check. Exiting...")
+                    nRobotsPerState[kilobot.state] += 1
+                print(f"[Timestep {iTimestep}] Number of robots per state: {nRobotsPerState}")
+                if (nRobotsPerState[State.JOINED_SHAPE] > nKilobotsOrigin and
+                        nRobotsPerState == nRobotsPerStatePrev):
+                    print("No robots have changed state since last check. Exiting...")
                     renderer.running = False
-                nRobotsJoinedShapePrevious = nRobotsJoinedShape
+                nRobotsPerStatePrev = nRobotsPerState
 
             iTimestep += 1
     except KeyboardInterrupt:

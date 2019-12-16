@@ -34,9 +34,9 @@ areaBoundaryColor = (189, 189, 189)
 
 
 class State(IntEnum):
-    WAIT_TO_MOVE = 1
-    MOVING = 2
-    JOINED_SHAPE = 3
+    WAIT_TO_MOVE = 0
+    MOVING = 1
+    JOINED_SHAPE = 2
 
 
 class Kilobot:
