@@ -1,3 +1,7 @@
+import numpy as np
+import numpy.linalg
+
+
 class SpatialMap:
     def __init__(self, stepSize, nCells):
         self.stepSize = stepSize
@@ -28,11 +32,13 @@ class SpatialMap:
         try:
             neighbors = []
             i, j = self._getIndices(pos)
-            iDist = int(maxDistance / self.stepSize)
+            iDist = int(np.ceil(maxDistance / self.stepSize))
             for iOther in range(i - iDist, i + iDist):
                 for jOther in range(j - iDist, j + iDist):
-                    if self.grid[iOther][jOther] is not None and self.grid[iOther][jOther] is not caller:
-                        neighbors.append(self.grid[iOther][jOther])
+                    if self.grid[iOther][jOther] is not None:
+                        obj = self.grid[iOther][jOther]
+                        if obj is not caller and np.linalg.norm(obj.pActual - pos) < maxDistance:
+                            neighbors.append(self.grid[iOther][jOther])
             return neighbors
         except IndexError:
             raise ValueError("Spatial map to small!")
