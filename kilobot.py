@@ -16,10 +16,10 @@ colorDirectionLine = (192, 192, 192)
 size = 15
 velocity = 1
 turnSpeed = np.pi / 30
-communicationRange = 100
+communicationRange = 170
 neighborUpdateInterval = 5
 
-preferedDistance = 32 #Bugged for <= 2 * size
+preferedDistance = 31 #Bugged for <= 2 * size
 maxAngleError = np.pi / 30
 gradientCommunicationRange = preferedDistance + 10
 noiseStdDev = 5
@@ -104,11 +104,15 @@ class Kilobot:
                     self._edgeFollow(deltaTime,closestRobot)
 
                 isInsideShape = self._isInsideShape()
+                dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
+                v = closestRobot.pos - self.pos
+                d = np.dot(dirV, v)/np.linalg.norm(v)
+
                 if isInsideShape and self.enteredShapeTimestep == -1:
                         self.enteredShapeTimestep = iTimestep
                 elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
                          (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
-                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal)):
+                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal and d > np.sin(maxAngleError))):
                     self.state = State.JOINED_SHAPE
             Kilobot.spatialMap.addEntry(self, self.pActual)
 
@@ -271,7 +275,7 @@ class Kilobot:
         partialSquareArea = size**2/2*(centralAngle - (np.sin(centralAngle)))
         if boolP == False:
             partialSquareArea = np.pi*size**2 - partialSquareArea
-        return (partialSquareArea)    
+        return (partialSquareArea)
 
 
 class KilobotOrigin(Kilobot):
