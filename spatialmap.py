@@ -41,7 +41,7 @@ class SpatialMap:
                             neighbors.append(self.grid[iOther][jOther])
             return neighbors
         except IndexError:
-            raise ValueError("Spatial map to small!")
+            raise ValueError("Spatial map too small!")
 
     def _getIndices(self, pos):
         extends = len(self.grid) * self.stepSize / 2
