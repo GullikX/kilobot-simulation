@@ -15,12 +15,12 @@ colorDirectionLine = (192, 192, 192)
 
 size = 15
 velocity = 1
-turnSpeed = np.pi / 30
+turnSpeed = np.pi / 20
 communicationRange = 170
 neighborUpdateInterval = 5
 
-preferedDistance = 31 #Bugged for <= 2 * size
-maxAngleError = np.pi / 30
+preferedDistance = 32 #Bugged for <= 2 * size
+maxAngleError = np.pi / 20
 gradientCommunicationRange = preferedDistance + 10
 noiseStdDev = 5
 directionNoiseStdDev = 0.1
@@ -112,7 +112,7 @@ class Kilobot:
                         self.enteredShapeTimestep = iTimestep
                 elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
                          (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
-                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal and d > np.sin(maxAngleError))):
+                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal and d > np.sin(pi/6))):
                     self.state = State.JOINED_SHAPE
             Kilobot.spatialMap.addEntry(self, self.pActual)
 
