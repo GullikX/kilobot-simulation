@@ -106,17 +106,23 @@ class Kilobot:
                         closestRobot = self._findClosestRobot(deltaTime)
                         self._edgeFollow(deltaTime,closestRobot)
 
-                    isInsideShape = self._isInsideShape()
                     closestRobot = self._findClosestRobot(deltaTime)
                     dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
                     v = closestRobot.pos - self.pos
                     d = np.dot(dirV, v)/np.linalg.norm(v)
 
-                    if isInsideShape and self.enteredShapeTimestep == -1:
+                    justSwitchedOrbit = (d > np.sin(np.pi/6))
+                    isInsideShape = self._isInsideShape()
+                    hasEnteredShapeBefore = (self.enteredShapeTimestep > 0)
+                    hasBeenInsideShapeLongEnough = ((iTimestep - self.enteredShapeTimestep) > stoppingTimesteps)
+                    orbitingNeighborWithHigherOrEqualGradient = (closestRobot.gradientVal >= self.gradientVal)
+
+                    if isInsideShape and not hasEnteredShapeBefore:
                             self.enteredShapeTimestep = iTimestep
-                    elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
-                             (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
-                            (isInsideShape and closestRobot.gradientVal >= self.gradientVal and d > np.sin(np.pi/6))):
+                    elif (
+                            (hasEnteredShapeBefore and not isInsideShape and hasBeenInsideShapeLongEnough) or
+                            (isInsideShape and orbitingNeighborWithHigherOrEqualGradient and justSwitchedOrbit)
+                        ):
                         self.state = State.JOINED_SHAPE
                 else:
                     self._edgeFollow(deltaTime, None)
