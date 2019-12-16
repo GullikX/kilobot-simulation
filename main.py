@@ -38,11 +38,11 @@ def main():
                 gradientVal = 0
             else:
                 gradientVal = 1
-            kilobots[iKilobot] = KilobotOrigin(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
+            kilobots[iKilobot] = KilobotOrigin(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal, nrOfRobots)
         else:
             startAngle = random.uniform(0, 2*np.pi)
             gradientVal = np.inf
-            kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
+            kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal, nrOfRobots)
     nRobotsPerStatePrev = [0, 0, nKilobotsOrigin]
 
     # Run simulation
