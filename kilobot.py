@@ -43,7 +43,7 @@ class Kilobot:
     bitMapArray = []
     scalingFactor = 0
     spatialMap = SpatialMap(spatialMapGridSize, spatialMapCells)
-    def __init__ (self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
+    def __init__ (self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal, nRobots):
         self.renderer = renderer
         Kilobot.bitMapArray = np.transpose(np.flip(bitMapArray, 0))
         Kilobot.scalingFactor = scalingFactor
@@ -58,6 +58,7 @@ class Kilobot:
         self.sensorError = np.array([np.random.normal(0, noiseStdDev), np.random.normal(0, noiseStdDev)])
         self.enteredShapeTimestep = -1
         Kilobot.spatialMap.addEntry(self, self.pActual)
+        self.initialWaitTime = nRobots
 
     def _getMovePriority(self):
         if self.state != State.MOVING:
@@ -83,7 +84,7 @@ class Kilobot:
             self._getNeighbors(kilobots)
         [neighborGradients, maxNeighborGradient] = self._getNeighborGradients()
 
-        if self.state == State.WAIT_TO_MOVE:
+        if self.state == State.WAIT_TO_MOVE and iTimestep > self.initialWaitTime:
             nNeighborsMoving = 0
             for neighbor in self.comNeighbors:
                 if neighbor.state == State.MOVING:
@@ -274,8 +275,8 @@ class Kilobot:
 
 
 class KilobotOrigin(Kilobot):
-    def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal):
-        Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal)
+    def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal, nRobots):
+        Kilobot.__init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal, nRobots)
         self.state = State.JOINED_SHAPE
         self.pos = self.pActual
         self.sensorError = np.array([0, 0])
