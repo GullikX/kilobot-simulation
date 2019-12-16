@@ -30,7 +30,7 @@ stoppingTimesteps = 25
 nScorePoints = 100
 
 spatialMapGridSize = 7  # [mm]
-spatialMapCells = 300
+spatialMapCells = 3000
 areaSize = spatialMapGridSize * spatialMapCells - 2*communicationRange  # [mm]
 areaBoundaryColor = (189, 189, 189)
 
