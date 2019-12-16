@@ -4,7 +4,7 @@ import numpy as np
 import random
 import sys
 
-from kilobot import Kilobot, KilobotOrigin
+from kilobot import Kilobot, KilobotOrigin, State
 from renderer import Renderer
 #from rendererdummy import Renderer
 from helpers import generateBotCoords, calcScalingFactor
@@ -13,6 +13,7 @@ nKilobotsOrigin = 4
 nrOfRobots = 20
 initialPositionsFile = "data/initPos.csv"
 bitMapFile = "data/bitmap.csv"
+stopCriteriaCheckInterval = 10000  # timesteps
 
 def main():
     # Get current time
@@ -42,6 +43,7 @@ def main():
             startAngle = random.uniform(0, 2*np.pi)
             gradientVal = np.inf
             kilobots[iKilobot] = Kilobot(renderer, initialPositions[iKilobot], startAngle, bitMapArray, bitMapScalingFactor, gradientVal)
+    nRobotsJoinedShapePrevious = nKilobotsOrigin
 
     # Run simulation
     iTimestep = 0
@@ -60,6 +62,19 @@ def main():
             for kilobot in kilobots:
                 kilobot.draw()
             renderer.updateDisplay()
+
+            # Stop simulation if no new bots have joined the shape in a long time
+            if iTimestep % stopCriteriaCheckInterval == 0:
+                nRobotsJoinedShape = 0
+                for kilobot in kilobots:
+                    if kilobot.state == State.JOINED_SHAPE:
+                        nRobotsJoinedShape += 1
+                print(f"[Timestep {iTimestep}] Number of robots in shape: {nRobotsJoinedShape}")
+                if (nRobotsJoinedShape > nKilobotsOrigin and
+                        nRobotsJoinedShape ==  nRobotsJoinedShapePrevious):
+                    print("No new robots have joined the shape since last check. Exiting...")
+                    renderer.running = False
+                nRobotsJoinedShapePrevious = nRobotsJoinedShape
 
             iTimestep += 1
     except KeyboardInterrupt:
