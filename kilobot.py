@@ -98,25 +98,29 @@ class Kilobot:
             if np.isnan(self.pos).any():
                 self._edgeFollow(deltaTime, None)
             else:
-                neighborMovePriorities = [None] * len(self.comNeighbors)
-                for i in range(len(self.comNeighbors)):
-                    neighborMovePriorities[i] = self.comNeighbors[i]._getMovePriority()
-                if len(self.comNeighbors) == 0 or self._getMovePriority() > max(neighborMovePriorities):
+                if len(self.comNeighbors) > 0:
+                    neighborMovePriorities = [None] * len(self.comNeighbors)
+                    for i in range(len(self.comNeighbors)):
+                        neighborMovePriorities[i] = self.comNeighbors[i]._getMovePriority()
+                    if self._getMovePriority() > max(neighborMovePriorities):
+                        closestRobot = self._findClosestRobot(deltaTime)
+                        self._edgeFollow(deltaTime,closestRobot)
+
+                    isInsideShape = self._isInsideShape()
                     closestRobot = self._findClosestRobot(deltaTime)
-                    self._edgeFollow(deltaTime,closestRobot)
+                    dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
+                    v = closestRobot.pos - self.pos
+                    d = np.dot(dirV, v)/np.linalg.norm(v)
 
-                isInsideShape = self._isInsideShape()
-                closestRobot = self._findClosestRobot(deltaTime)
-                dirV = np.array([np.cos(self.direction), np.sin(self.direction)])
-                v = closestRobot.pos - self.pos
-                d = np.dot(dirV, v)/np.linalg.norm(v)
+                    if isInsideShape and self.enteredShapeTimestep == -1:
+                            self.enteredShapeTimestep = iTimestep
+                    elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
+                             (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
+                            (isInsideShape and closestRobot.gradientVal >= self.gradientVal and d > np.sin(np.pi/6))):
+                        self.state = State.JOINED_SHAPE
+                else:
+                    self._edgeFollow(deltaTime, None)
 
-                if isInsideShape and self.enteredShapeTimestep == -1:
-                        self.enteredShapeTimestep = iTimestep
-                elif ((not isInsideShape and not self.enteredShapeTimestep == -1 and
-                         (iTimestep - self.enteredShapeTimestep) > stoppingTimesteps) or
-                        (isInsideShape and closestRobot.gradientVal >= self.gradientVal and d > np.sin(np.pi/6))):
-                    self.state = State.JOINED_SHAPE
             Kilobot.spatialMap.addEntry(self, self.pActual)
 
     def _isInsideShape(self):
