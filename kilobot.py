@@ -256,8 +256,8 @@ class Kilobot:
 
     def calcOverlappingA(self):
         thehta = np.linspace(0,2*np.pi, nScorePoints)
-        x = self.pos[0] + size * np.cos(thehta)
-        y = self.pos[1] + size * np.sin(thehta)
+        x = self.pActual[0] + size * np.cos(thehta)
+        y = self.pActual[1] + size * np.sin(thehta)
         p = []
         pos = np.array([x[0],y[0]]).astype(int)
         boolP = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
