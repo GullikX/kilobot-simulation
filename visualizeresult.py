@@ -3,7 +3,7 @@ import numpy as np
 import pygame
 import sys
 
-from helpers import calcScalingFactor
+from helpers import calcScalingFactor, calcOverlappingA
 from renderer import Renderer
 
 colorRobotBody = (
@@ -13,6 +13,19 @@ colorRobotBody = (
 )
 colorRobotDirectionLine = (192, 192, 192)
 robotSize = 15
+nScorePoints = 100
+
+
+def calculateScore(positions, bitMapArray, bitMapScalingFactor):
+    nRobots = np.shape(positions)[0]
+    score = 0
+    for iPosition in range(nRobots):
+        position = positions[iPosition, 0:2]
+        score += calcOverlappingA(position, robotSize, nScorePoints, bitMapArray, bitMapScalingFactor)
+        print(score)
+    figArea = np.sum(bitMapArray)*bitMapScalingFactor**2
+    score = score/figArea
+    return score
 
 
 def drawBot(renderer, position, direction, state):
@@ -40,7 +53,10 @@ def main():
     states = np.loadtxt(statesFile, dtype=int)
     nBots = len(states)
     bitMapArray = np.loadtxt(bitMapFile)
-    bitMapScalingFactor = calcScalingFactor(nBots, bitMapArray,31)
+    bitMapScalingFactor = calcScalingFactor(nBots, bitMapArray, 31)
+
+    score = calculateScore(positions, bitMapArray, bitMapScalingFactor)
+    print(f"Score: {score}")
 
     renderer = Renderer(bitMapArray, bitMapScalingFactor)
 
