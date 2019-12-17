@@ -265,17 +265,19 @@ class Kilobot:
             pos = np.array([x[i],y[i]]).astype(int)
             bitMapVal = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
             if len(p) < 2:
-                if boolP == True and bool(bitMapVal) == False:
+                if boolP and not bool(bitMapVal):
                     p.append(i)
                     boolP = False
-                elif boolP == False and bool(bitMapVal) == True:
+                elif not boolP and bool(bitMapVal):
                     p.append(i)
                     boolP = True
 
-        if len(p) == 0 and boolP == True:
-            return np.pi*size**2
-        elif len(p) == 0 and boolP == False:
-            return -np.pi*size**2
+        if len(p) == 0:
+            if boolP:
+                return np.pi*size**2
+            else:
+                return -np.pi*size**2
+
         centralAngle = thehta[p[1]] -  thehta[p[0]]
         partialSquareArea = size**2/2*(centralAngle - (np.sin(centralAngle)))
         if boolP:
