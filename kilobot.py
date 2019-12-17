@@ -5,7 +5,7 @@ from math import sqrt
 import numpy as np
 import time
 
-from helpers import isInsideShape
+from helpers import calcOverlappingA, isInsideShape
 from spatialmap import SpatialMap
 
 colorBody = (
@@ -255,34 +255,7 @@ class Kilobot:
                 self.pActual += normV*(size - normDist)*0.1
 
     def calcOverlappingA(self):
-        thehta = np.linspace(0,2*np.pi, nScorePoints)
-        x = self.pActual[0] + size * np.cos(thehta)
-        y = self.pActual[1] + size * np.sin(thehta)
-        p = []
-        pos = np.array([x[0],y[0]]).astype(int)
-        boolP = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
-        for i in range(nScorePoints):
-            pos = np.array([x[i],y[i]]).astype(int)
-            bitMapVal = isInsideShape(Kilobot.bitMapArray, Kilobot.scalingFactor, pos)
-            if len(p) < 2:
-                if boolP and not bool(bitMapVal):
-                    p.append(i)
-                    boolP = False
-                elif not boolP and bool(bitMapVal):
-                    p.append(i)
-                    boolP = True
-
-        if len(p) == 0:
-            if boolP:
-                return np.pi*size**2
-            else:
-                return -np.pi*size**2
-
-        centralAngle = thehta[p[1]] -  thehta[p[0]]
-        partialSquareArea = size**2/2*(centralAngle - (np.sin(centralAngle)))
-        if boolP:
-            partialSquareArea = np.pi*size**2 - partialSquareArea
-        return (2*partialSquareArea) - (np.pi*size**2)
+        return calcOverlappingA(self.pActual, size, nScorePoints, Kilobot.bitMapArray, Kilobot.scalingFactor)
 
     def resetSpatialMap(self):
         Kilobot.spatialMap = SpatialMap(spatialMapGridSize, spatialMapCells)
