@@ -13,7 +13,7 @@ nKilobotsOrigin = 4
 nrOfRobots = 100
 initialPositionsFile = "data/initPos.csv"
 bitMapFile = "data/bitmap.csv"
-stopCriteriaCheckInterval = 10000  # timesteps
+stopCriteriaCheckInterval = 30000  # timesteps
 
 def main(nrOfBots, initialPositionsFile, bitMapFile, saveState=False):
     # Get current time

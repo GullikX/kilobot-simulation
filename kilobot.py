@@ -18,7 +18,7 @@ colorDirectionLine = (192, 192, 192)
 size = 15
 velocity = 1
 turnSpeed = np.pi / 20
-communicationRange = 170
+communicationRange = 100
 neighborUpdateInterval = 5
 
 preferedDistance = 32 #Bugged for <= 2 * size
