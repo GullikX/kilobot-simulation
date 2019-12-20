@@ -103,18 +103,21 @@ def main(nrOfBots, initialPositionsFile, bitMapFile, saveState=False):
 
     kilobots[0].resetSpatialMap()
 
-    return score
+    noiseLeves = kilobots[0].getNoiseVal()
+    return score, noiseLeves
 
 
-listOfNrOfRobots = [10, 20, 50, 100, 150, 300, 500, 700, 800, 900, 1000]
+listOfNrOfRobots = [10, 20, 50, 100, 150, 250, 500, 750, 1000]
 d = []
+fileName = ""
 for i in range(len(listOfNrOfRobots)):
     nrOfRobots = listOfNrOfRobots[i]
     score = 0
     for n in range(5):
-        score += main(nrOfRobots, initialPositionsFile, bitMapFile)
+        tempScore, fileName = main(nrOfRobots, initialPositionsFile, bitMapFile)
+        score += tempScore
     d.append(score/5)
-
+fileName = "./" + fileName + ".csv"
 print(d)
 df = pandas.DataFrame(data={"col1": listOfNrOfRobots, "col2": d})
 df.to_csv("./data.csv", sep=',' , index=False)

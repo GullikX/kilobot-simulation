@@ -260,6 +260,8 @@ class Kilobot:
     def resetSpatialMap(self):
         Kilobot.spatialMap = SpatialMap(spatialMapGridSize, spatialMapCells)
 
+    def getNoiseVal(self):
+        return  "noise=" + str(noiseStdDev) + "-" + "dirNoise=" + str(directionNoiseStdDev)
 
 class KilobotOrigin(Kilobot):
     def __init__(self, renderer, startPosition, startDirection, bitMapArray, scalingFactor, gradientVal, nRobots):
