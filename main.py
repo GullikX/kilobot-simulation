@@ -2,20 +2,19 @@
 import datetime
 import numpy as np
 import random
-import sys
-import pandas
 from kilobot import Kilobot, KilobotOrigin, State
-#from renderer import Renderer
-from rendererdummy import Renderer
+from renderer import Renderer
+#from rendererdummy import Renderer
 from helpers import generateBotCoords, calcScalingFactor
-deltaTime = 1
+deltaTime = 1  # [s]
 nKilobotsOrigin = 4
-nrOfRobots = 100
+nrOfRobots = 10
 initialPositionsFile = "data/initPos.csv"
 bitMapFile = "data/bitmap.csv"
-stopCriteriaCheckInterval = 30000  # timesteps
+stopCriteriaCheckInterval = 10000  # timesteps
+saveState = False
 
-def main(nrOfBots, initialPositionsFile, bitMapFile, saveState=False):
+def main():
     # Get current time
     date_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
@@ -88,8 +87,8 @@ def main(nrOfBots, initialPositionsFile, bitMapFile, saveState=False):
     score = score/figArea
     print(f"Score: {score}")
 
-    if saveState == True:
     # Write state to csv files
+    if saveState == True:
         positions = np.zeros((nrOfRobots, 3))
         states = np.zeros((nrOfRobots, 1))
         for iBot in range(nrOfRobots):
@@ -102,25 +101,6 @@ def main(nrOfBots, initialPositionsFile, bitMapFile, saveState=False):
         np.savetxt(f"{date_time}-states.csv", states, fmt="%d")
 
     kilobots[0].resetSpatialMap()
-
-    noiseLeves = kilobots[0].getNoiseVal()
-    return score, noiseLeves
-
-
-listOfNrOfRobots = [10, 20, 50, 100, 150, 250, 500, 750, 1000]
-d = []
-fileName = ""
-for i in range(len(listOfNrOfRobots)):
-    nrOfRobots = listOfNrOfRobots[i]
-    score = 0
-    for n in range(5):
-        tempScore, fileName = main(nrOfRobots, initialPositionsFile, bitMapFile)
-        score += tempScore
-    d.append(score/5)
-fileName = "./" + fileName + ".csv"
-print(d)
-df = pandas.DataFrame(data={"col1": listOfNrOfRobots, "col2": d})
-df.to_csv("./data.csv", sep=',' , index=False)
 
 
 if __name__ == "__main__":

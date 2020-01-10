@@ -221,8 +221,6 @@ class Kilobot:
 
         self.renderer.drawCircle(colorBody[self.state], position, size)
         self.renderer.drawLine(colorDirectionLine, position, directionLineTarget, size/4)
-        if self.state == State.MOVING:
-            self.renderer.drawCircle(colorBody[self.state], position, gradientCommunicationRange, width=1)
 
         self.renderer.drawRectangle(
                 areaBoundaryColor,
