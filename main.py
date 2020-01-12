@@ -8,7 +8,7 @@ from renderer import Renderer
 from helpers import generateBotCoords, calcScalingFactor
 deltaTime = 1  # [s]
 nKilobotsOrigin = 4
-nrOfRobots = 10
+nrOfRobots = 100
 initialPositionsFile = "data/initPos.csv"
 bitMapFile = "data/bitmap.csv"
 stopCriteriaCheckInterval = 10000  # timesteps
